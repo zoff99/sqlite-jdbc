@@ -114,7 +114,7 @@ $(SQLITE_OUT)/$(LIBNAME): $(SQLITE_HEADER) $(SQLITE_OBJ) $(SRC)/org/sqlite/core/
 	$(CC) $(CCFLAGS) -o $@ $(SQLITE_OUT)/NativeDB.o $(SQLITE_OBJ) $(LINKFLAGS)
 # Workaround for strip Protocol error when using VirtualBox on Mac
 	cp $@ /tmp/$(@F)
-	$(STRIP) /tmp/$(@F)
+	# DO NOT STRIP # $(STRIP) /tmp/$(@F)
 	cp /tmp/$(@F) $@
 
 NATIVE_DIR=src/main/resources/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
