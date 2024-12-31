@@ -31,17 +31,14 @@ CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
 
 $(SQLITE_ARCHIVE):
 	@mkdir -p $(@D)
-	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2024/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2023/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2022/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2021/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2020/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/$(SQLITE_OLD_AMAL_PREFIX).zip
+	mkdir -p $(SQLITE_SOURCE)/
+	curl -L https://github.com/zoff99/gen_sqlcipher_amalgamation/releases/download/nightly/sqlite3.c --output $(SQLITE_SOURCE)/sqlite3.c
+	curl -L https://github.com/zoff99/gen_sqlcipher_amalgamation/releases/download/nightly/sqlite3.h --output $(SQLITE_SOURCE)/sqlite3.h
+	curl -L https://github.com/zoff99/gen_sqlcipher_amalgamation/releases/download/nightly/sqlite3ext.h --output $(SQLITE_SOURCE)/sqlite3ext.h
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
-	unzip -qo $< -d $(TARGET)/tmp.$(version)
-	(mv $(TARGET)/tmp.$(version)/$(SQLITE_AMAL_PREFIX) $(TARGET) && rmdir $(TARGET)/tmp.$(version)) || mv $(TARGET)/tmp.$(version)/ $(TARGET)/$(SQLITE_AMAL_PREFIX)
+	pwd
+	echo $@
 	touch $@
 
 $(JAVA_CLASSPATH):
@@ -78,6 +75,9 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    $(SQLITE_OUT)/sqlite3.c.tmp > $(SQLITE_OUT)/sqlite3.c
 	cat src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
 	$(CC) -o $@ -c $(CCFLAGS) \
+	    -DSQLITE_HAS_CODEC -DHAVE_LIBSQLCIPHER -DSQLCIPHER_CRYPTO_OPENSSL -DSQLITE_TEMP_STORE=2 -I./openssl_includes \
+	    -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_DEFAULT_JOURNAL_SIZE_LIMIT=1048576 -DSQLITE_ENABLE_STAT3 \
+	    -DSQLITE_ENABLE_PREUPDATE_HOOK \
 	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
 	    -DSQLITE_HAVE_ISNAN \
 	    -DHAVE_USLEEP=1 \
@@ -103,7 +103,8 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    -DSQLITE_MAX_PAGE_COUNT=4294967294 \
 	    -DSQLITE_DISABLE_PAGECACHE_OVERFLOW_STATS \
 	    $(SQLITE_FLAGS) \
-	    $(SQLITE_OUT)/sqlite3.c
+	    $(SQLITE_OUT)/sqlite3.c \
+	    openssl_libs/$(OS_NAME)-$(OS_ARCH)/libsqlfs.a openssl_libs/$(OS_NAME)-$(OS_ARCH)/sqlite3.a -lm
 
 $(SQLITE_SOURCE)/sqlite3.h: $(SQLITE_UNPACKED)
 
