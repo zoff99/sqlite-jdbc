@@ -64,6 +64,7 @@ clean: clean-native clean-java clean-tests
 
 $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	@mkdir -p $(@D)
+	ls -al openssl_libs/$(OS_NAME)-$(OS_ARCH)/libssl.a openssl_libs/$(OS_NAME)-$(OS_ARCH)/libcrypto.a
 	perl -p -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
 	    $(SQLITE_SOURCE)/sqlite3ext.h > $(SQLITE_OUT)/sqlite3ext.h
 # insert a code for loading extension functions
