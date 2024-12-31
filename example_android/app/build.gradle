@@ -20,6 +20,15 @@ android {
         }
     }
 
+    sourceSets {
+        main {
+            jni.srcDirs = []
+            jniLibs.srcDirs = ['nativelibs']
+        }
+        androidTest {
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
