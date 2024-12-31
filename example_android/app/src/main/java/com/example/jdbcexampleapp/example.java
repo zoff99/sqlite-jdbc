@@ -4,6 +4,8 @@ import android.content.Context;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 @SuppressWarnings("ALL")
@@ -11,6 +13,54 @@ public class example
 {
     private String path;
     private final String TAG = "JDBC-Example:";
+    private static Connection connection = null;
+
+    /*
+     * Runs SQL statements that are seperated by ";" character
+     */
+    public static void run_multi_sql(String sql_multi)
+    {
+        try
+        {
+            Statement statement = null;
+
+            try
+            {
+                statement = connection.createStatement();
+                statement.setQueryTimeout(10);  // set timeout to x sec.
+            }
+            catch (SQLException e)
+            {
+                System.err.println(e.getMessage());
+            }
+
+            String[] queries = sql_multi.split(";");
+            for (String query : queries)
+            {
+                try
+                {
+                    // Log.i(TAG, "SQL:" + query);
+                    statement.executeUpdate(query);
+                }
+                catch (SQLException e)
+                {
+                    System.err.println(e.getMessage());
+                }
+            }
+
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
 
     String testme(Context c)
     {
@@ -23,16 +73,20 @@ public class example
         // here we need java.io.* classes since the container file is a "real" file
         java.io.File db = new java.io.File(path);
 
-        /*
-            UnsatisfiedLinkError: dlopen failed: cannot locate symbol "RAND_bytes" referenced by
-            "/lib/x86_64/libsqlitejdbc.so"
-         */
-        System.loadLibrary("sqlitejdbc");
-
-        Connection connection = null;
         try
         {
-            connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+            String class_sqlite = String.valueOf(Class.forName("org.sqlite.JDBC"));
+            System.out.println(TAG + class_sqlite);
+            ret = ret + "\n" + class_sqlite;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        try
+        {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + path);
         }
         catch (Exception e)
         {
@@ -45,6 +99,50 @@ public class example
         catch (Exception e)
         {
             throw new RuntimeException(e);
+        }
+
+        try
+        {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(
+                    "select db_version from orma_schema order by db_version desc limit 1");
+            if (rs.next())
+            {
+                int ret2 = rs.getInt("db_version");
+                System.out.println(TAG + "db_version: " + ret2);
+                ret = ret + "\n" +  "db_version: " + ret2;
+            }
+
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                final String update_001 = "CREATE TABLE orma_schema (db_version INTEGER NOT NULL);";
+                run_multi_sql(update_001);
+                final String update_002 = "insert into orma_schema values ('0');";
+                run_multi_sql(update_002);
+            }
+            catch (Exception e2)
+            {
+                e2.printStackTrace();
+            }
+        }
+
+        try
+        {
+            connection.close();
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(ex);
         }
 
         // all finished
