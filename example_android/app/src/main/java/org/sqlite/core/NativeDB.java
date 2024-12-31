@@ -43,8 +43,10 @@ public final class NativeDB extends DB {
     private static boolean loadSucceeded;
 
     static {
+        System.out.println("XXXXXXXXXXXXXXXXXX:001");
         if ("The Android Project".equals(System.getProperty("java.vm.vendor"))) {
             System.loadLibrary("sqlitejdbc");
+            System.out.println("XXXXXXXXXXXXXXXXXX:002");
             isLoaded = true;
             loadSucceeded = true;
         } else {
