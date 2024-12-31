@@ -9,6 +9,17 @@ on:
   push:
 
 jobs:
+  update-nightly-tag:
+    name: Update nightly release tag
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/android_test'
+    permissions:
+        contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Move nightly tag to head for nightly release
+        run: git tag -f nightly && git push origin nightly -f
+
   matrix:
     name: Build matrix
     runs-on: ubuntu-latest
@@ -34,18 +45,43 @@ jobs:
     needs: [matrix]
     strategy:
       matrix: ${{fromJson(needs.matrix.outputs.matrix)}}
+    permissions:
+        contents: write
     steps:
       - uses: actions/checkout@v4
+
       # Delete existing libs so we only upload the generated one into the artifact
       - name: Delete existing native libs
         run: rm -fr src/main/resources/org/sqlite/native
+
       - name: Build native libraries
         run: make ${{ matrix.target }}
         env:
           OCI_EXE: docker
+
       - name: Upload native libraries
         uses: actions/upload-artifact@v4
         with:
           name: native-libs-${{ matrix.target }}
           path: src/main/resources/org/sqlite/native/
 
+      - name: rename artifact
+        run: |
+          ls -al /tmp/ || echo "NO ERR"
+          ls -alR src/main/resources/org/sqlite/native/ || echo "NO ERR"
+          ls -al src/main/resources/org/sqlite/native/*/*/libsqlitejdbc.so
+          cp -v src/main/resources/org/sqlite/native/*/*/libsqlitejdbc.so ${{ matrix.target }}__libsqlitejdbc.so
+          ls -rattl *libsqlitejdbc.so
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/android_test'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "${{ matrix.target }}__libsqlitejdbc.so"
