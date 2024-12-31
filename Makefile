@@ -104,15 +104,14 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    -DSQLITE_MAX_PAGE_COUNT=4294967294 \
 	    -DSQLITE_DISABLE_PAGECACHE_OVERFLOW_STATS \
 	    $(SQLITE_FLAGS) \
-	    $(SQLITE_OUT)/sqlite3.c \
-	    openssl_libs/$(OS_NAME)-$(OS_ARCH)/libssl.a openssl_libs/$(OS_NAME)-$(OS_ARCH)/libcrypto.a -lm
+	    $(SQLITE_OUT)/sqlite3.c
 
 $(SQLITE_SOURCE)/sqlite3.h: $(SQLITE_UNPACKED)
 
 $(SQLITE_OUT)/$(LIBNAME): $(SQLITE_HEADER) $(SQLITE_OBJ) $(SRC)/org/sqlite/core/NativeDB.c $(TARGET)/common-lib/NativeDB.h
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -I $(TARGET)/common-lib -c -o $(SQLITE_OUT)/NativeDB.o $(SRC)/org/sqlite/core/NativeDB.c
-	$(CC) $(CCFLAGS) -o $@ $(SQLITE_OUT)/NativeDB.o $(SQLITE_OBJ) $(LINKFLAGS)
+	$(CC) $(CCFLAGS) -o $@ $(SQLITE_OUT)/NativeDB.o $(SQLITE_OBJ) openssl_libs/$(OS_NAME)-$(OS_ARCH)/libssl.a openssl_libs/$(OS_NAME)-$(OS_ARCH)/libcrypto.a -lm  $(LINKFLAGS)
 # Workaround for strip Protocol error when using VirtualBox on Mac
 	cp $@ /tmp/$(@F)
 	# DO NOT STRIP # $(STRIP) /tmp/$(@F)
