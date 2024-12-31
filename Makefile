@@ -104,7 +104,7 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    -DSQLITE_DISABLE_PAGECACHE_OVERFLOW_STATS \
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3.c \
-	    openssl_libs/$(OS_NAME)-$(OS_ARCH)/libsqlfs.a openssl_libs/$(OS_NAME)-$(OS_ARCH)/sqlite3.a -lm
+	    openssl_libs/$(OS_NAME)-$(OS_ARCH)/libssl.a openssl_libs/$(OS_NAME)-$(OS_ARCH)/libcrypto.a -lm
 
 $(SQLITE_SOURCE)/sqlite3.h: $(SQLITE_UNPACKED)
 
