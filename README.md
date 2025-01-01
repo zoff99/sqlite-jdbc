@@ -4,7 +4,7 @@ SQLite JDBC Driver with SQLCipher included
 [![Build Native](https://github.com/zoff99/sqlite-jdbc/actions/workflows/build-native.yml/badge.svg)](https://github.com/zoff99/sqlite-jdbc/actions/workflows/build-native.yml)
 [![Android Example App](https://github.com/zoff99/sqlite-jdbc/actions/workflows/android_app.yml/badge.svg?branch=android_test)](https://github.com/zoff99/sqlite-jdbc/actions/workflows/android_app.yml)
 
-<img src="https://github.com/zoff99/sqlite-jdbc/releases/download/nightly/android_screen01.png" height="300"></a>
+<img src="https://github.com/zoff99/sqlite-jdbc/releases/download/nightly/android_screen01.png" height="600"></a>
 <br>
 
 
