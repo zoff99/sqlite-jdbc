@@ -13,7 +13,9 @@ public class example
 {
     private String path;
     private final String TAG = "JDBC-Example:";
+    private final String good_password = "pass123iesj,ä0p23.oe jiwayä,wsyäysä9 wrr jäsäökfs poö$§&";
     private static Connection connection = null;
+    private static String ret = "";
 
     /*
      * Runs SQL statements that are seperated by ";" character
@@ -39,7 +41,7 @@ public class example
             {
                 try
                 {
-                    // Log.i(TAG, "SQL:" + query);
+                    System.out.println("SQL:" + query);
                     statement.executeUpdate(query);
                 }
                 catch (SQLException e)
@@ -52,12 +54,14 @@ public class example
             {
                 statement.close();
             }
-            catch (Exception ignored)
+            catch (Exception e)
             {
+                System.err.println(e.getMessage());
             }
         }
         catch (Exception e)
         {
+            System.err.println(e.getMessage());
         }
     }
 
@@ -65,16 +69,13 @@ public class example
     String testme(Context c)
     {
         System.out.println(TAG + "starting ...");
-        String ret = "\nstarting ...";
+        ret = "\nstarting ...";
 
         // define the path where the vfs container file will be located
         path = c.getExternalFilesDir(null).getAbsolutePath() + "/" + "text" + ".db";
 
         // here we need java.io.* classes since the container file is a "real" file
         java.io.File db = new java.io.File(path);
-
-        // delete DB
-        // db.delete();
 
         try
         {
@@ -87,44 +88,15 @@ public class example
             throw new RuntimeException(e);
         }
 
-        try
-        {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + path);
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
+        System.out.println(TAG + "open DB");
+        ret = ret + "\n" +  "open DB";
+        open_db(good_password, true);
 
-        // set password
-        final String set_key = "PRAGMA key = 'pass123%$';";
-        run_multi_sql(set_key);
-
-        try
+        boolean db_open = check_db_open();
+        if (!db_open)
         {
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery(
-                    "SELECT count(*) as sqlite_master_count FROM sqlite_master");
-            if (rs.next())
-            {
-                long ret2 = rs.getLong("sqlite_master_count");
-                System.out.println(TAG + "sqlite_master_count: " + ret2);
-                ret = ret + "\n" +  "sqlite_master_count: " + ret2;
-            }
-
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            System.out.println(TAG + "DBERR: database could not be opened!!");
-            return ret;
+            System.out.println(TAG + "error opening DB");
+            ret = ret + "\n" + "error opening DB";
         }
 
         try
@@ -171,10 +143,94 @@ public class example
             throw new RuntimeException(ex);
         }
 
+
+        // close DB
+        System.out.println(TAG + "close DB.");
+        ret = ret + "\n" + "close DB";
+
+        // delete DB
+        db.delete();
+        System.out.println(TAG + "delete DB.");
+        ret = ret + "\n" + "delete DB";
+
+        // reopen DB with correct key
+        System.out.println(TAG + "reopen DB");
+        ret = ret + "\n" +  "reopen DB";
+        open_db(good_password, true);
+
+        boolean db_reopen = check_db_open();
+        if (!db_reopen)
+        {
+            System.out.println(TAG + "error re-opening DB");
+            ret = ret + "\n" + "error re-opening DB";
+        }
+
+        // close DB
+        System.out.println(TAG + "close again DB.");
+        ret = ret + "\n" + "close again DB";
+
         // all finished
         System.out.println(TAG + "finished.");
         ret = ret + "\n" + "finished";
 
         return ret;
+    }
+
+    private boolean check_db_open()
+    {
+        boolean ret2 = false;
+        try
+        {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(
+                    "SELECT count(*) as sqlite_master_count FROM sqlite_master");
+            if (rs.next())
+            {
+                long ret3 = rs.getLong("sqlite_master_count");
+                System.out.println(TAG + "sqlite_master_count: " + ret3);
+                ret = ret + "\n" + "sqlite_master_count: " + ret3;
+                ret2 = true;
+            }
+
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            System.out.println(TAG + "DBERR: database could not be opened!!");
+            ret = ret + "\n" + "DBERR: database could not be opened!!";
+        }
+        return ret2;
+    }
+
+    private void open_db(final String password, boolean wal_mode)
+    {
+        try
+        {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + path);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        // set password
+        final String set_key = "PRAGMA key = '" + password + "';";
+        run_multi_sql(set_key);
+        ret = ret + "\n" + "set password";
+
+        if  (wal_mode)
+        {
+            // set WAL mode
+            final String set_wal_mode = "PRAGMA journal_mode = WAL;";
+            run_multi_sql(set_wal_mode);
+            ret = ret + "\n" + "set WAL mode";
+        }
     }
 }
