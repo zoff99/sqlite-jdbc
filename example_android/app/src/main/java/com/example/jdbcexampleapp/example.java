@@ -73,6 +73,9 @@ public class example
         // here we need java.io.* classes since the container file is a "real" file
         java.io.File db = new java.io.File(path);
 
+        // delete DB
+        // db.delete();
+
         try
         {
             String class_sqlite = String.valueOf(Class.forName("org.sqlite.JDBC"));
@@ -92,13 +95,36 @@ public class example
         {
             throw new RuntimeException(e);
         }
+
+        // set password
+        final String set_key = "PRAGMA key = 'pass123%$';";
+        run_multi_sql(set_key);
+
         try
         {
             Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(
+                    "SELECT count(*) as sqlite_master_count FROM sqlite_master");
+            if (rs.next())
+            {
+                long ret2 = rs.getLong("sqlite_master_count");
+                System.out.println(TAG + "sqlite_master_count: " + ret2);
+                ret = ret + "\n" +  "sqlite_master_count: " + ret2;
+            }
+
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
         }
         catch (Exception e)
         {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            System.out.println(TAG + "DBERR: database could not be opened!!");
+            return ret;
         }
 
         try
