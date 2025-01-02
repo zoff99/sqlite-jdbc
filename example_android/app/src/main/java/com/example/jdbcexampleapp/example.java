@@ -19,8 +19,8 @@ public class example
     private static String ret = "";
     private static boolean thread_read_stop = false;
     private static boolean use_wal_mode = true;
-    private static final int num_inserts = 1000;
-    private static final int num_threads_write = 5;
+    private static final int num_inserts = 300;
+    private static final int num_threads_write = 8;
     private static final int num_threads_read = 10;
 
     /*
@@ -278,8 +278,29 @@ public class example
 
     String testme(Context c)
     {
+        long time_start = System.currentTimeMillis();
+
+        try
+        {
+            System.out.println(TAG + "app version:" + BuildConfig.VERSION_NAME);
+            ret = ret + "\n" + "app version:" + BuildConfig.VERSION_NAME;
+
+            System.out.println(TAG + "git hash:" + BuildConfig.GIT_HASH);
+            ret = ret + "\n" + "git hash:" + BuildConfig.GIT_HASH;
+        }
+        catch(Exception e)
+        {
+            try
+            {
+                ret = ret + "\n" + "git hash:" + BuildConfig.GIT_HASH;
+            }
+            catch(Exception ignored)
+            {
+            }
+        }
+
         System.out.println(TAG + "starting ...");
-        ret = "\nstarting ...";
+        ret = ret + "\n" + "starting ...";
 
         // define the path where the vfs container file will be located
         // path = c.getExternalFilesDir(null).getAbsolutePath() + "/" + "text" + ".db";
@@ -460,9 +481,11 @@ public class example
             throw new RuntimeException(ex);
         }
 
+        long time_end = System.currentTimeMillis();
+
         // all finished
-        System.out.println(TAG + "finished.");
-        ret = ret + "\n" + "finished";
+        System.out.println(TAG + "finished (" + (long)((time_end - time_start) / 1000) + " s)");
+        ret = ret + "\n" + "finished (" + (long)((time_end - time_start) / 1000) + " s)";
 
         return ret;
     }

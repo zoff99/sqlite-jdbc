@@ -18,6 +18,7 @@ import org.sqlite.core.DB.ProgressObserver;
 import org.sqlite.util.Logger;
 import org.sqlite.util.LoggerFactory;
 
+@SuppressWarnings("JavadocReference")
 public abstract class JDBC3Statement extends CoreStatement {
 
     private int queryTimeout; // in seconds, as per the JDBC spec

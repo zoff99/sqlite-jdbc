@@ -77,7 +77,7 @@ jobs:
           script: |
             cd example_android/ ; ./gradlew build ; ./gradlew installDebug
             adb shell am start -n com.example.jdbcexampleapp/com.example.jdbcexampleapp.MainActivity  &
-            sleep 50
+            sleep 180
             adb shell screencap -p > ~/android_screen01.png
             ls -al ~/android_screen01.png
             adb logcat -d |grep 'JDBC-Example:' &
