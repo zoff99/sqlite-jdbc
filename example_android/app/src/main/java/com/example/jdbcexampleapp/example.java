@@ -19,9 +19,9 @@ public class example
     private static String ret = "";
     private static boolean thread_read_stop = false;
     private static boolean use_wal_mode = true;
-    private static final int num_inserts = 300;
-    private static final int num_threads_write = 8;
-    private static final int num_threads_read = 10;
+    private static final int num_inserts = 50;
+    private static final int num_threads_write = 3;
+    private static final int num_threads_read = 4;
 
     /*
      * Runs SQL statements that are seperated by ";" character

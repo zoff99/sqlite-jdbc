@@ -77,11 +77,11 @@ jobs:
           script: |
             cd example_android/ ; ./gradlew build ; ./gradlew installDebug
             adb shell am start -n com.example.jdbcexampleapp/com.example.jdbcexampleapp.MainActivity  &
-            sleep 180
+            sleep 120
             adb shell screencap -p > ~/android_screen01.png
             ls -al ~/android_screen01.png
-            adb logcat -d |grep 'JDBC-Example:' &
-            sleep 20
+            adb logcat -d |grep 'JDBC-Example:'
+            sleep 2
 
       - name: upload screenshots
         uses: actions/upload-artifact@v4
