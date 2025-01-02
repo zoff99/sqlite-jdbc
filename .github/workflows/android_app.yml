@@ -81,6 +81,7 @@ jobs:
             adb shell screencap -p > ~/android_screen01.png
             ls -al ~/android_screen01.png
             adb logcat -d |grep 'JDBC-Example:'
+            adb logcat -d > ~/adb_log.txt
             sleep 2
 
       - name: upload screenshots
@@ -89,6 +90,13 @@ jobs:
           name: linuxscreen
           path: |
             /home/runner/android_screen*.png
+
+      - name: upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: adb_log
+          path: |
+            /home/runner/adb_log.txt
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
