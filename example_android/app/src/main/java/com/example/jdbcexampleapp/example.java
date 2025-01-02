@@ -303,8 +303,8 @@ public class example
         ret = ret + "\n" + "starting ...";
 
         // define the path where the vfs container file will be located
-        // path = c.getExternalFilesDir(null).getAbsolutePath() + "/" + "text" + ".db";
-        path = "/data/data/com.example.jdbcexampleapp/files/" + "text2.db";
+        path = c.getExternalFilesDir(null).getAbsolutePath() + "/" + "text" + ".db";
+        // path = "/data/data/com.example.jdbcexampleapp/files/" + "text2.db";
 
         // here we need java.io.* classes since the container file is a "real" file
         java.io.File db = new java.io.File(path);
