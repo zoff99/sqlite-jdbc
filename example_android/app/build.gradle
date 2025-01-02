@@ -34,8 +34,6 @@ android {
         // Enabling multidex support
         multiDexEnabled true
 
-        vectorDrawables.useSupportLibrary = true
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments useTestStorageService: 'true'
         vectorDrawables {

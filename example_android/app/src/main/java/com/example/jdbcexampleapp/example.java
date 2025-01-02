@@ -19,9 +19,9 @@ public class example
     private static String ret = "";
     private static boolean thread_read_stop = false;
     private static boolean use_wal_mode = true;
-    private static final int num_inserts = 50;
+    private static final int num_inserts = 500;
     private static final int num_threads_write = 3;
-    private static final int num_threads_read = 4;
+    private static final int num_threads_read = 10;
 
     /*
      * Runs SQL statements that are seperated by ";" character
@@ -303,8 +303,11 @@ public class example
         ret = ret + "\n" + "starting ...";
 
         // define the path where the vfs container file will be located
-        path = c.getExternalFilesDir(null).getAbsolutePath() + "/" + "text" + ".db";
-        // path = "/data/data/com.example.jdbcexampleapp/files/" + "text2.db";
+        // path = c.getExternalFilesDir(null).getAbsolutePath() + "/" + "text" + ".db";
+        // path = "/data/data/com.example.jdbcexampleapp/files/" + "text.db";
+        path = c.getFilesDir().getAbsolutePath() + "/" + "text" + ".db";
+        System.out.println(TAG + "path: " + path);
+        ret = ret + "\n" + "path: " + path;
 
         // here we need java.io.* classes since the container file is a "real" file
         java.io.File db = new java.io.File(path);
