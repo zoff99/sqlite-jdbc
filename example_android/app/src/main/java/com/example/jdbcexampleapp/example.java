@@ -623,6 +623,7 @@ public class example
         }
 
         // set password
+        // TODO: escape password, but we can not use prepared statement here :-(
         final String set_key = "PRAGMA key = '" + password + "';";
         run_multi_sql(set_key);
         ret = ret + "\n" + "set password";
