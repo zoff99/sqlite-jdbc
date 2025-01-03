@@ -104,6 +104,87 @@ public class example
         return count;
     }
 
+    void sqlcipher_version(String tnum_str)
+    {
+        String v = "???";
+        try
+        {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("PRAGMA cipher_version");
+            if (rs.next())
+            {
+                v = rs.getString(1);
+                System.out.println(TAG + tnum_str + ":sqlcipher_version: " + v);
+                ret = ret + "\n" + "sqlcipher version: " + v;
+            }
+
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
+    void sqlcipher_ssl_provider(String tnum_str)
+    {
+        String v = "???";
+        try
+        {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("PRAGMA cipher_provider");
+            if (rs.next())
+            {
+                v = rs.getString(1);
+                System.out.println(TAG + tnum_str + ":sqlcipher_cipher_provider: " + v);
+                ret = ret + "\n" + "cipher provider: " + v;
+            }
+
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
+    void sqlcipher_ssl_provider_version(String tnum_str)
+    {
+        String v = "???";
+        try
+        {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("PRAGMA cipher_provider_version");
+            if (rs.next())
+            {
+                v = rs.getString(1);
+                System.out.println(TAG + tnum_str + ":sqlcipher_cipher_provider_version: " + v);
+                ret = ret + "\n" + "cipher provider: " + v;
+            }
+
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
     void insert_gm_single()
     {
         String insert_pstmt_sql = null;
@@ -333,6 +414,10 @@ public class example
             System.out.println(TAG + "error opening DB");
             ret = ret + "\n" + "error opening DB";
         }
+
+        sqlcipher_version("main");
+        sqlcipher_ssl_provider("main");
+        sqlcipher_ssl_provider_version("main");
 
         try
         {
