@@ -43,7 +43,7 @@ fun Greeting(modifier: Modifier = Modifier) {
     Text(
         text = "" + txt,
         modifier = modifier,
-        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 24.0.sp)
+        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 12.sp, lineHeight = 21.0.sp)
     )
 }
 
