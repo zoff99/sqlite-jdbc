@@ -160,14 +160,3 @@ clean-java:
 clean-tests:
 	rm -rf $(TARGET)/{surefire*,testdb.jar*}
 
-docker-linux64:
-	docker build -f docker/Dockerfile.linux_x86_64 -t xerial/centos5-linux-x86_64 .
-
-docker-linux32:
-	docker build -f docker/Dockerfile.linux_x86 -t xerial/centos5-linux-x86 .
-
-docker-linux-musl32:
-	docker build -f docker/Dockerfile.alpine-linux_x86 -t gotson/alpine-linux-x86 .
-
-docker-linux-musl64:
-	docker build -f docker/Dockerfile.alpine-linux_x86_64 -t xerial/alpine-linux-x86_64 .
