@@ -8,18 +8,7 @@ import java.util.logging.Level;
  * java.util.logging implementation otherwise.
  */
 public class LoggerFactory {
-    static final boolean USE_SLF4J;
-
-    static {
-        boolean useSLF4J;
-        try {
-            Class.forName("org.slf4j.Logger");
-            useSLF4J = true;
-        } catch (Exception e) {
-            useSLF4J = false;
-        }
-        USE_SLF4J = useSLF4J;
-    }
+    static final boolean USE_SLF4J = false;
 
     /**
      * Get a {@link Logger} instance for the given host class.
@@ -28,10 +17,6 @@ public class LoggerFactory {
      * @return a Logger
      */
     public static Logger getLogger(Class<?> hostClass) {
-        if (USE_SLF4J) {
-            return new SLF4JLogger(hostClass);
-        }
-
         return new JDKLogger(hostClass);
     }
 
@@ -67,42 +52,6 @@ public class LoggerFactory {
         public void error(Supplier<String> message, Throwable t) {
             if (logger.isLoggable(Level.SEVERE)) {
                 logger.log(Level.SEVERE, message.get(), t);
-            }
-        }
-    }
-
-    private static class SLF4JLogger implements Logger {
-        final org.slf4j.Logger logger;
-
-        SLF4JLogger(Class<?> hostClass) {
-            logger = org.slf4j.LoggerFactory.getLogger(hostClass);
-        }
-
-        @Override
-        public void trace(Supplier<String> message) {
-            if (logger.isTraceEnabled()) {
-                logger.trace(message.get());
-            }
-        }
-
-        @Override
-        public void info(Supplier<String> message) {
-            if (logger.isInfoEnabled()) {
-                logger.info(message.get());
-            }
-        }
-
-        @Override
-        public void warn(Supplier<String> message) {
-            if (logger.isWarnEnabled()) {
-                logger.warn(message.get());
-            }
-        }
-
-        @Override
-        public void error(Supplier<String> message, Throwable t) {
-            if (logger.isErrorEnabled()) {
-                logger.error(message.get(), t);
             }
         }
     }
