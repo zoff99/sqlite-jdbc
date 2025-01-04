@@ -104,6 +104,33 @@ public class example
         return count;
     }
 
+    void sqlite_version(String tnum_str)
+    {
+        String v = "???";
+        try
+        {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT sqlite_version()");
+            if (rs.next())
+            {
+                v = rs.getString(1);
+                System.out.println(TAG + tnum_str + ":sqlite_version: " + v);
+                ret = ret + "\n" + "sqlite version: " + v;
+            }
+
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
     void sqlcipher_version(String tnum_str)
     {
         String v = "???";
@@ -415,6 +442,7 @@ public class example
             ret = ret + "\n" + "error opening DB";
         }
 
+        sqlite_version("main");
         sqlcipher_version("main");
         sqlcipher_ssl_provider("main");
         sqlcipher_ssl_provider_version("main");
