@@ -14,7 +14,7 @@ public class example
 {
     private String path;
     private final String TAG = "JDBC-Example:";
-    private final String good_password = "pass123iesj,ä0p23.oe jiwayä,wsyäysä9 wrr jäsäökfs poö$§&";
+    private final String good_password = "pass1;\\ \t \r \n 23i/ .. . + , ; : _ - !\"§$%&/()=?[]{}@#.* x* yesj,ä0p23.oe jiwayä,wsyäysä9 wrr jäsäökfs poö$§&";
     private static Connection connection = null;
     private static String ret = "";
     private static boolean thread_read_stop = false;
@@ -643,18 +643,12 @@ public class example
     {
         try
         {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + path);
+            connection = DriverManager.getConnection("jdbc:sqlite:" + path, null, password);
         }
         catch (Exception e)
         {
             throw new RuntimeException(e);
         }
-
-        // set password
-        // TODO: escape password, but we can not use prepared statement here :-(
-        final String set_key = "PRAGMA key = '" + password + "';";
-        run_multi_sql(set_key);
-        ret = ret + "\n" + "set password";
 
         if  (wal_mode)
         {
