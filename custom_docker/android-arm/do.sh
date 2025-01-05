@@ -12,3 +12,4 @@ pwd
 ls -al
 docker run --rm sqlite-jdbc_and_arm > ./dockcross-android-arm
 chmod +x ./dockcross-android-arm
+cd ../../
