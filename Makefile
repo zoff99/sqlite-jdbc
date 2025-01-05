@@ -138,7 +138,8 @@ linux-android-x86: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-android-x86 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/i686-linux-android/bin/i686-linux-android- OS_NAME=Linux-Android OS_ARCH=x86'
 
 linux-android-x64: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-android-x86_64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/x86_64-linux-android/bin/x86_64-linux-android- OS_NAME=Linux-Android OS_ARCH=x86_64'
+	./custom_docker/android-x86_64/do.sh
+	./custom_docker/dockcross-android-x86_64 -i sqlite-jdbc_and_x86_64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/x86_64-linux-android/bin/x86_64-linux-android- OS_NAME=Linux-Android OS_ARCH=x86_64'
 
 
 package: native-all
