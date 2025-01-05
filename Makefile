@@ -130,18 +130,22 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 
 linux-android-arm: $(SQLITE_UNPACKED) jni-header
 	./custom_docker/android-arm/do.sh
+	pwd
 	./custom_docker/dockcross-android-arm -i sqlite-jdbc_and_arm -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/arm-linux-androideabi/bin/arm-linux-androideabi- OS_NAME=Linux-Android OS_ARCH=arm'
 
 linux-android-arm64: $(SQLITE_UNPACKED) jni-header
 	./custom_docker/android-arm64/do.sh
+	pwd
 	./custom_docker/dockcross-android-arm64 -i sqlite-jdbc_and_arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/aarch64-linux-android/bin/aarch64-linux-android- OS_NAME=Linux-Android OS_ARCH=aarch64'
 
 linux-android-x86: $(SQLITE_UNPACKED) jni-header
 	./custom_docker/android-x86/do.sh
+	pwd
 	./custom_docker/dockcross-android-x86 -i sqlite-jdbc_and_x86 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/i686-linux-android/bin/i686-linux-android- OS_NAME=Linux-Android OS_ARCH=x86'
 
 linux-android-x64: $(SQLITE_UNPACKED) jni-header
 	./custom_docker/android-x86_64/do.sh
+	pwd
 	./custom_docker/dockcross-android-x86_64 -i sqlite-jdbc_and_x86_64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/x86_64-linux-android/bin/x86_64-linux-android- OS_NAME=Linux-Android OS_ARCH=x86_64'
 
 

@@ -8,5 +8,7 @@ echo "$_HOME_"
 cd "$_HOME_" || exit
 
 docker build -f Dockerfile -t sqlite-jdbc_and_arm .
+pwd
+ls -al
 docker run --rm sqlite-jdbc_and_arm > ./dockcross-android-arm
 chmod +x ./dockcross-android-arm
