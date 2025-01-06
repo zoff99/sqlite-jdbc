@@ -4,6 +4,8 @@ SQLite JDBC Driver for Android with SQLCipher included
 [![Build Native](https://github.com/zoff99/sqlite-jdbc/actions/workflows/build-native.yml/badge.svg)](https://github.com/zoff99/sqlite-jdbc/actions/workflows/build-native.yml)
 [![Android Example App](https://github.com/zoff99/sqlite-jdbc/actions/workflows/android_app.yml/badge.svg?branch=android_test)](https://github.com/zoff99/sqlite-jdbc/actions/workflows/android_app.yml)
 
+currently it works on Android API 21 and above.
+
 <img src="https://github.com/zoff99/sqlite-jdbc/releases/download/nightly/android_screen01_21.png" height="400"></a>
 <img src="https://github.com/zoff99/sqlite-jdbc/releases/download/nightly/android_screen01_29.png" height="400"></a>
 <img src="https://github.com/zoff99/sqlite-jdbc/releases/download/nightly/android_screen01_33.png" height="400"></a>
