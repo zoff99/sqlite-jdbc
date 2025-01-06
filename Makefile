@@ -8,7 +8,8 @@ RESOURCE_DIR = src/main/resources
 all: jni-header package
 
 deploy: 
-	mvn package deploy -DperformRelease=true
+	echo dummy
+	# mvn package deploy -DperformRelease=true
 
 DOCKER_RUN_OPTS=--rm
 MVN:=mvn
@@ -16,29 +17,12 @@ CODESIGN:=docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir gotson/rcodesign sign
 SRC:=src/main/java
 SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
 SQLITE_OBJ?=$(SQLITE_OUT)/sqlite3.o
-SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
-SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
-SQLITE_SOURCE?=$(TARGET)/$(SQLITE_AMAL_PREFIX)
+SQLITE_SOURCE?=sqlcipher
 SQLITE_HEADER?=$(SQLITE_SOURCE)/sqlite3.h
-ifneq ($(SQLITE_SOURCE),$(TARGET)/$(SQLITE_AMAL_PREFIX))
-	created := $(shell touch $(SQLITE_UNPACKED))
-endif
 
 SQLITE_INCLUDE := $(shell dirname "$(SQLITE_HEADER)")
 
 CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
-
-$(SQLITE_ARCHIVE):
-	@mkdir -p $(@D)
-	mkdir -p $(SQLITE_SOURCE)/
-	curl -L https://github.com/zoff99/gen_sqlcipher_amalgamation/releases/download/nightly/sqlite3.c --output $(SQLITE_SOURCE)/sqlite3.c
-	curl -L https://github.com/zoff99/gen_sqlcipher_amalgamation/releases/download/nightly/sqlite3.h --output $(SQLITE_SOURCE)/sqlite3.h
-	curl -L https://github.com/zoff99/gen_sqlcipher_amalgamation/releases/download/nightly/sqlite3ext.h --output $(SQLITE_SOURCE)/sqlite3ext.h
-
-$(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
-	pwd
-	echo $@
-	touch $@
 
 $(TARGET)/common-lib/org/sqlite/%.class: src/main/java/org/sqlite/%.java
 	@mkdir -p $(@D)
@@ -150,8 +134,9 @@ linux-android-x64: $(SQLITE_UNPACKED) jni-header
 
 
 package: native-all
-	rm -rf target/dependency-maven-plugin-markers
-	$(MVN) package
+	echo "dummy"
+	# rm -rf target/dependency-maven-plugin-markers
+	# $(MVN) package
 
 clean-native:
 	rm -rf $(SQLITE_OUT)
