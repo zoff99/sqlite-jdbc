@@ -87,14 +87,14 @@ jobs:
       - name: upload screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: linuxscreen
+          name: linuxscreen_${{ matrix.api-level }}
           path: |
             /home/runner/android_screen*.png
 
       - name: upload screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: adb_log
+          name: adb_log_${{ matrix.api-level }}
           path: |
             /home/runner/adb_log.txt
 
