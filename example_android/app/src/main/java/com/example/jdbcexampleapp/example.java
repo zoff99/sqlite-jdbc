@@ -1,6 +1,7 @@
 package com.example.jdbcexampleapp;
 
 import android.content.Context;
+import android.os.Build;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -395,6 +396,9 @@ public class example
 
             System.out.println(TAG + "git hash:" + BuildConfig.GIT_HASH);
             ret = ret + "\n" + "git hash:" + BuildConfig.GIT_HASH;
+
+            System.out.println(TAG + "Android API:" + Build.VERSION.SDK_INT);
+            ret = ret + "\n" + "Android API:" + Build.VERSION.SDK_INT;
         }
         catch(Exception e)
         {
