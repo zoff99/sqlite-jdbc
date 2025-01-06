@@ -1,0 +1,26 @@
+name: check upstream
+
+on:
+  schedule:
+    # runs Tue at 12:00 am
+    - cron: '0 0 * * 2'
+  push:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+
+jobs:
+  auto-update-dependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: check for new upstream commits
+      run: ./tools/check_for_upstream_changes.sh
