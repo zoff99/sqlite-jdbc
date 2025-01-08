@@ -132,6 +132,33 @@ public class example
         }
     }
 
+    void pragma_compile_options(String tnum_str)
+    {
+        String v = "???";
+        try
+        {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM pragma_compile_options");
+            while (rs.next())
+            {
+                v = rs.getString(1);
+                System.out.println(TAG + tnum_str + ":pragma_compile_options: " + v);
+                // ret = ret + "\n" + "sqlcipher pragma_compile_options: " + v;
+            }
+
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
     void sqlcipher_version(String tnum_str)
     {
         String v = "???";
@@ -450,6 +477,7 @@ public class example
         sqlcipher_version("main");
         sqlcipher_ssl_provider("main");
         sqlcipher_ssl_provider_version("main");
+        pragma_compile_options("main");
 
         try
         {
