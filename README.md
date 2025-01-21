@@ -14,6 +14,19 @@ currently it works on Android API 21 and above.
 <img src="https://github.com/zoff99/sqlite-jdbc/releases/download/nightly/android_screen01_35.png" height="400"></a>
 <br>
 
+### openSSL libs and includes
+
+the libs in
+https://github.com/zoff99/sqlite-jdbc/tree/android_test/openssl_libs
+and includes in
+https://github.com/zoff99/sqlite-jdbc/tree/android_test/openssl_includes/openssl
+are updated from
+https://github.com/zoff99/iocipher_pack/tree/master/003_src_iocipher/libiocipher2-c/src/main/jniLibs
+and
+https://github.com/zoff99/iocipher_pack/tree/master/002_src_libsqlfs/openssl_includes/openssl
+
+
+
 ### Android Example Project
 see: https://github.com/zoff99/sqlite-jdbc/tree/android_test/example_android
 <br>
