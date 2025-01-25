@@ -115,7 +115,7 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 linux64: $(SQLITE_UNPACKED) jni-header
 	./custom_docker/linux64/do.sh
 	pwd
-	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work -i sqlite-jdbc_lin_x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work -i sqlite-jdbc_lin_x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64 && chmod -R a+w ./target/*-Linux-x86_64 ./target/classes/org/sqlite/native/'
 
 linux-android-arm: $(SQLITE_UNPACKED) jni-header
 	./custom_docker/android-arm/do.sh
@@ -140,8 +140,8 @@ linux-android-x64: $(SQLITE_UNPACKED) jni-header
 
 package: native-all
 	echo "dummy"
-	# rm -rf target/dependency-maven-plugin-markers
-	# $(MVN) package
+	rm -rf target/dependency-maven-plugin-markers
+	$(MVN) package -Dmaven.test.skip
 
 clean-native:
 	rm -rf $(SQLITE_OUT)
@@ -149,7 +149,7 @@ clean-native:
 clean-java:
 	rm -rf $(TARGET)/*classes
 	rm -rf $(TARGET)/common-lib/*
-	rm -rf $(TARGET)/sqlite-jdbc-*jar
+	rm -rf $(TARGET)/sqlite-*
 
 clean-tests:
 	rm -rf $(TARGET)/{surefire*,testdb.jar*}
