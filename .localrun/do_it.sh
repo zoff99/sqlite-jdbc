@@ -16,7 +16,9 @@ rm -f ./src/main/resources/org/sqlite/native/Linux-Android/aarch64/libsqlitejdbc
  ./src/main/resources/org/sqlite/native/Linux-Android/x86/libsqlitejdbc.so \
  ./src/main/resources/org/sqlite/native/Linux-Android/x86_64/libsqlitejdbc.so
 
-make || exit 1
+make clean
+mkdir -p target/classes/org/sqlite/native
+make -j2 || exit 1
 
 # copy the libs into the android example source
 echo "copy the libs into the android example source ..."
@@ -24,4 +26,8 @@ cp -v ./src/main/resources/org/sqlite/native/Linux-Android/aarch64/libsqlitejdbc
 cp -v ./src/main/resources/org/sqlite/native/Linux-Android/arm/libsqlitejdbc.so ./example_android/app/nativelibs/armeabi-v7a/libsqlitejdbc.so
 cp -v ./src/main/resources/org/sqlite/native/Linux-Android/x86/libsqlitejdbc.so ./example_android/app/nativelibs/x86/libsqlitejdbc.so
 cp -v ./src/main/resources/org/sqlite/native/Linux-Android/x86_64/libsqlitejdbc.so ./example_android/app/nativelibs/x86_64/libsqlitejdbc.so
+
+mvn package -Dmaven.test.skip || exit 1
+
+ls -alh target/
 
