@@ -102,7 +102,7 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64
+native-all: linux64 linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64
 
 native: $(NATIVE_DLL)
 
@@ -111,6 +111,11 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 	cp $< $@
 	@mkdir -p $(NATIVE_TARGET_DIR)
 	cp $< $(NATIVE_TARGET_DIR)/$(LIBNAME)
+
+linux64: $(SQLITE_UNPACKED) jni-header
+	./custom_docker/linux64/do.sh
+	pwd
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work -i sqlite-jdbc_lin_x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
 
 linux-android-arm: $(SQLITE_UNPACKED) jni-header
 	./custom_docker/android-arm/do.sh
