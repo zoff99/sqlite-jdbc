@@ -50,7 +50,8 @@ cd ./stub_work/root/ || exit 1
 zip -r ../local_maven.zip ./.m2 || exit 1
 zip -r ../local_maven_androidjdbc_"$cur_str_version".zip ./.m2 || exit 1
 
-# ls -1 ./003_src_iocipher/stub_work/local_maven_androidjdbc_"$cur_str_version".zip
+cd "$basedir"
+ls -hal ./example_android/stub_work/local_maven_androidjdbc_"$cur_str_version".zip || exit 1
 
 echo "====== maven repository: OK ======"
 
