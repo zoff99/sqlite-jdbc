@@ -132,6 +132,21 @@ public class example
         }
     }
 
+    void AndroidJDBC_version(String tnum_str)
+    {
+        String v = "???";
+        try
+        {
+            // HINT: this lint error ist a false positive. not sure how to get rid of it?
+            v = com.zoffcc.applications.androidjdbc.BuildConfig.VERSION_NAME;
+            System.out.println(TAG + tnum_str + ":AndroidJDBC_version: " + v);
+            ret = ret + "\n" + "AndroidJDBC version: " + v;
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
     void pragma_compile_options(String tnum_str)
     {
         String v = "???";
@@ -478,6 +493,7 @@ public class example
         sqlcipher_ssl_provider("main");
         sqlcipher_ssl_provider_version("main");
         pragma_compile_options("main");
+        AndroidJDBC_version("main");
 
         try
         {
