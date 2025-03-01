@@ -1,0 +1,135 @@
+name: build
+on:
+  push:
+    paths-ignore:
+     - 'README.md'
+  pull_request:
+    paths-ignore:
+     - 'README.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+jobs:
+
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install system packages
+      run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          zipalign \
+          apksigner
+
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: build maven artifact
+      run: |
+        ./tools/make_aar_and_maven.sh
+
+    - name: Rename artifact for nightly upload
+      run: |
+        cp -av ./example_android/stub_work/local_maven_androidjdbc_*.zip ./
+
+    - name: Upload to nightly release
+      uses: ncipollo/release-action@v1
+      if: github.event_name == 'push' && github.ref == 'refs/heads/android_test'
+      with:
+        allowUpdates: true
+        tag: nightly
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
+        prerelease: true
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "local_maven_androidjdbc*.zip"
+
+
+    - name: Upload to versioned release
+      if: contains(github.ref, 'refs/tags/v')
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        draft: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "local_maven_androidjdbc*.zip"
+
+
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+
+    - name: build and test linux version
+      run: |
+        cd 003_src_iocipher/linux_jni/c_src && ./compile_linux_c.sh || (cat compile.log; exit 1)
+
+    - name: install mingw cross compiler
+      run: |
+           sudo apt-get update
+           DEBIAN_FRONTEND=noninteractive \
+           sudo apt-get install -y --no-install-recommends \
+           wine libwine-dev libwine wine64 wine64-tools \
+           make wget git coreutils autoconf \
+           libtool pkg-config gcc-mingw-w64-x86-64 \
+           gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 binutils-mingw-w64-x86-64 \
+           mingw-w64-tools pkg-config-mingw-w64-x86-64 \
+           mingw-w64-x86-64-dev
+
+    - name: build windows version
+      run: |
+        cd 003_src_iocipher/linux_jni/c_src && ./compile_win_c.sh || (cat compile.win.log; exit 1)
+
+    - name: rename linux c_src compile.log
+      run: |
+        cp -v 003_src_iocipher/linux_jni/c_src/compile.log ./compile_linux_c_src.log
+
+    - name: rename windows c_src compile.log
+      run: |
+        cp -v 003_src_iocipher/linux_jni/c_src/compile.win.log ./compile_win_c_src.log
+
+    - name: move linux c_src jar
+      run: |
+        cp -v 003_src_iocipher/linux_jni/c_src/iocipher_linux-*.jar ./
+
+    - name: Upload to nightly release
+      uses: ncipollo/release-action@v1
+      if: github.event_name == 'push' && github.ref == 'refs/heads/android_test'
+      with:
+        allowUpdates: true
+        tag: nightly
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
+        prerelease: true
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "iocipher_linux-*.jar,compile_linux_c_src.log,compile_win_c_src.log"
+
+    - name: Upload to versioned release
+      if: contains(github.ref, 'refs/tags/v')
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        draft: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "iocipher_linux-*.jar,compile_linux_c_src.log,compile_win_c_src.log"
+
+
+    - name: raw speed test on linux
+      run: |
+        cd 003_src_iocipher/linux_jni/c_src && ./speedtest_linux_c.sh || exit 1
+
+    - name: check that all java classes are for java 1.8
+      run: |
+        tools/check_java_classes_version.sh
