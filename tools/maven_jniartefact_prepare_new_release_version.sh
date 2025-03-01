@@ -39,7 +39,7 @@ echo $next_m_version
 sed -i -e 's#versionCode .*#versionCode '"$next_p_version"'#g' "$f1"
 sed -i -e 's#versionName ".*#versionName "'"$next_m_version"'"#g' "$f1"
 
-sed -i -e 's#public static final int VERSION_CODE = ".*$#public static final int VERSION_CODE = '"$next_p_version"';#g' "$f2"
+sed -i -e 's#public static final int VERSION_CODE = .*$#public static final int VERSION_CODE = '"$next_p_version"';#g' "$f2"
 sed -i -e 's#public static final String VERSION_NAME = ".*$#public static final String VERSION_NAME = "'"$next_m_version"'";#g' "$f2"
 
 commit_message="jni ""$next_m_version"
