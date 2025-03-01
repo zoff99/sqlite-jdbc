@@ -43,6 +43,8 @@ sed -i -e 's#public static final int VERSION_CODE = ".*$#public static final int
 sed -i -e 's#public static final String VERSION_NAME = ".*$#public static final String VERSION_NAME = "'"$next_m_version"'";#g' "$f2"
 
 commit_message="jni ""$next_m_version"
+tag_name="sqlite-jdbc-jni-""$next_m_version"
 
 git commit -m "$commit_message" "$f1" "$f2"
+git tag -a "$tag_name" -m "$tag_name"
 
