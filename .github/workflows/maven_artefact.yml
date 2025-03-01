@@ -57,7 +57,7 @@ jobs:
 
 
     - name: Upload to versioned release
-      if: ${{ github.ref == 'refs/tags/sqlite-jdbc-jni-*' }}
+      if: contains(github.ref, 'refs/tags/jdbcjni')
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
