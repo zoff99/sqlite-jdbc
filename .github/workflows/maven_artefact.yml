@@ -55,6 +55,11 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: "local_maven_androidjdbc*.zip"
 
+    - name: GitHub info
+      run: |
+         echo "Tag name from GITHUB_REF_NAME: $GITHUB_REF_NAME" || echo "NO ERR"
+         echo "Tag name from github.ref_name: ${{  github.ref_name }}" || echo "NO ERR"
+         echo "Tag name from github.ref: ${{  github.ref }}" || echo "NO ERR"
 
     - name: Upload to versioned release
       if: contains(github.ref, 'refs/tags/jdbcjni')
