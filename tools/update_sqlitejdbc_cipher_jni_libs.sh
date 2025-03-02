@@ -1,4 +1,5 @@
 #! /bin/bash
+
 base_url='https://github.com/zoff99/sqlite-jdbc/releases/download/nightly/'
 
 file_arm64='linux-android-arm64__libsqlitejdbc.so'
@@ -14,7 +15,7 @@ _HOME_=$(cd $_HOME2_;pwd)
 export _HOME_
 
 basedir1="$_HOME_""/../src/main/resources/org/sqlite/native/Linux-Android/"
-basedir2="$_HOME_""/../example_android//app/nativelibs/"
+basedir2="$_HOME_""/../example_android/androidjdbc/nativelibs/"
 
 cd "$basedir1"
 wget "$base_url""$file_arm64" -O ./aarch64/"$file_jnilib"
