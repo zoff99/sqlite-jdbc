@@ -46,5 +46,4 @@ commit_message="jni ""$next_m_version"
 tag_name="jdbcjni""$next_m_version"
 
 git commit -m "$commit_message" "$f1" "$f2"
-git tag -a "$tag_name" -m "$tag_name"
-
+## do not tag yet ## git tag -a "$tag_name" -m "$tag_name"
