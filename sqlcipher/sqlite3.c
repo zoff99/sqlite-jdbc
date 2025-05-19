@@ -1,6 +1,6 @@
 /******************************************************************************
 ** This file is an amalgamation of many separate C source files from SQLite
-** version 3.49.1.  By combining all the individual C code files into this
+** version 3.49.2.  By combining all the individual C code files into this
 ** single large file, the entire code can be compiled as a single translation
 ** unit.  This allows many compilers to do optimizations that would not be
 ** possible if the files were compiled separately.  Performance improvements
@@ -18,7 +18,7 @@
 ** separate file. This file contains only code for the core SQLite library.
 **
 ** The content in this amalgamation comes from Fossil check-in
-** 873d4e274b4988d260ba8354a9718324a1c2 with changes in files:
+** 17144570b0d96ae63cd6f3edca39e27ebd74 with changes in files:
 **
 **    .fossil-settings/empty-dirs
 **    .fossil-settings/ignore-glob
@@ -495,9 +495,9 @@ extern "C" {
 ** [sqlite3_libversion_number()], [sqlite3_sourceid()],
 ** [sqlite_version()] and [sqlite_source_id()].
 */
-#define SQLITE_VERSION        "3.49.1"
-#define SQLITE_VERSION_NUMBER 3049001
-#define SQLITE_SOURCE_ID      "2025-02-18 13:38:58 873d4e274b4988d260ba8354a9718324a1c26187a4ab4c1cc0227c03d0f1alt1"
+#define SQLITE_VERSION        "3.49.2"
+#define SQLITE_VERSION_NUMBER 3049002
+#define SQLITE_SOURCE_ID      "2025-05-07 10:39:52 17144570b0d96ae63cd6f3edca39e27ebd74925252bbaf6723bcb2f6b486alt1"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -19165,6 +19165,7 @@ struct Index {
   unsigned bLowQual:1;     /* sqlite_stat1 says this is a low-quality index */
   unsigned bNoQuery:1;     /* Do not use this index to optimize queries */
   unsigned bAscKeyBug:1;   /* True if the bba7b69f9849b5bf bug applies */
+  unsigned bIdxRowid:1;    /* One or more of the index keys is the ROWID */
   unsigned bHasVCol:1;     /* Index references one or more VIRTUAL columns */
   unsigned bHasExpr:1;     /* Index contains an expression, either a literal
                            ** expression, or a reference to a VIRTUAL column */
@@ -64693,7 +64694,10 @@ SQLITE_PRIVATE const char *sqlite3PagerJournalname(Pager *pPager){
 /* BEGIN SQLCIPHER */
 #ifdef SQLITE_HAS_CODEC
 /*
-** Set or retrieve the codec for this pager
+** Set (or overwrite) the codec for this pager. If there is
+** already a codec context (pCodec) attached, it WILL NOT be freed.
+** The caller is responsible for freeing the old codec context prior
+** setting a new one.
 */
 void sqlcipherPagerSetCodec(
   Pager *pPager,
@@ -64702,11 +64706,7 @@ void sqlcipherPagerSetCodec(
   void (*xCodecFree)(void*),
   void *pCodec
 ){
-  if( pPager->xCodecFree ){
-    pPager->xCodecFree(pPager->pCodec);
-  }else{
-    pager_reset(pPager);
-  }
+  pager_reset(pPager);
   pPager->xCodec = pPager->memDb ? 0 : xCodec;
   pPager->xCodecSizeChng = xCodecSizeChng;
   pPager->xCodecFree = xCodecFree;
@@ -64714,6 +64714,7 @@ void sqlcipherPagerSetCodec(
   setGetterMethod(pPager);
   pagerReportSize(pPager);
 }
+/* Retrieve the codec for this pager */
 void *sqlcipherPagerGetCodec(Pager *pPager){
   return pPager->pCodec;
 }
@@ -97633,6 +97634,7 @@ case OP_MakeRecord: {
       zHdr += sqlite3PutVarint(zHdr, serial_type);
       if( pRec->n ){
         assert( pRec->z!=0 );
+        assert( pRec->z!=(const char*)sqlite3CtypeMap );
         memcpy(zPayload, pRec->z, pRec->n);
         zPayload += pRec->n;
       }
@@ -107520,7 +107522,8 @@ sqlcipher_provider* sqlcipher_get_provider(void);
 #define SQLCIPHER_MUTEX_RESERVED2         4
 #define SQLCIPHER_MUTEX_RESERVED3         5
 #define SQLCIPHER_MUTEX_MEM               6
-#define SQLCIPHER_MUTEX_COUNT             7
+#define SQLCIPHER_MUTEX_SHAREDCACHE       7
+#define SQLCIPHER_MUTEX_COUNT             8
 
 sqlite3_mutex* sqlcipher_mutex(int);
 
@@ -107602,7 +107605,7 @@ SQLITE_API void sqlite3pager_reset(Pager *pPager);
 #define CIPHER_STR(s) #s
 
 #ifndef CIPHER_VERSION_NUMBER
-#define CIPHER_VERSION_NUMBER 4.7.0
+#define CIPHER_VERSION_NUMBER 4.9.0
 #endif
 
 #ifndef CIPHER_VERSION_BUILD
@@ -107791,17 +107794,15 @@ static u8* sqlcipher_shield_mask = NULL;
 /* Establish the default size of the private heap. This can be overriden
  * at compile time by setting -DSQLCIPHER_PRIVATE_HEAP_SIZE_DEFAULT=X */
 #ifndef SQLCIPHER_PRIVATE_HEAP_SIZE_DEFAULT
-#ifdef __ANDROID__
-/* On android, the maximim amount of memory that can be memlocked in 64k.
- * The default heap size is chosen as 48K, which is either 4 (with 4k page size)
- * or 1 (with 16k age size) less than the max. We choose to allocate slightly
- * less than the max just in case the app has locked some other page(s) */
+/* On android, the maximim amount of memory that can be memlocked in 64k. This also
+ * seems to be a popular ulimit on linux distributions, containsers, etc. Therefore
+ * the default heap size is chosen as 48K, which is either 4 (with 4k page size)
+ * or 1 (with 16k page size) page less than the max. We choose to allocate slightly
+ * less than the max just in case the app has locked some other page(s). This
+ * initial allocation should be enough to support at least 10 concurrent
+ * sqlcipher-enabled database connections at the same time without requiring any
+ * overflow allocations */
 #define SQLCIPHER_PRIVATE_HEAP_SIZE_DEFAULT 49152
-#else
-/* On non-android platforms we'll attempt to allocate and lock a larger private heap
- * of around 128k instead. */
-#define SQLCIPHER_PRIVATE_HEAP_SIZE_DEFAULT 131072
-#endif
 #endif
 /* if default allocation fails, we'll reduce the size by this amount
  * and try again. This is also the minimium of the private heap. The minimum
@@ -107810,6 +107811,12 @@ static u8* sqlcipher_shield_mask = NULL;
 
 static volatile size_t private_heap_sz = SQLCIPHER_PRIVATE_HEAP_SIZE_DEFAULT;
 static u8* private_heap = NULL;
+static volatile size_t private_heap_used = 0; /* bytes currently used on private heap */
+static volatile size_t private_heap_hwm = 0; /* larged number of bytes used on the private heap at one time */
+static volatile size_t private_heap_alloc = 0; /* total bytes allocated on private heap over time */
+static volatile u32 private_heap_allocs = 0; /* total number of allocations on private heap over time */
+static volatile size_t private_heap_overflow = 0; /* total bytes overflowing private heap over time */
+static volatile u32 private_heap_overflows = 0; /* number of overlow allocations over time */
 
 /* to prevent excessive fragmentation blocks will
  * only be split if there are at least this many
@@ -107873,12 +107880,12 @@ sqlite3_mutex* sqlcipher_mutex(int mutex) {
 }
 
 static void sqlcipher_atexit(void) {
-  sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: calling sqlcipher_extra_shutdown()\n", __func__);
+  sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: calling sqlcipher_extra_shutdown()", __func__);
   sqlcipher_extra_shutdown();
 }
 
 static void sqlcipher_fini(void) {
-  sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: calling sqlcipher_extra_shutdown()\n", __func__);
+  sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: calling sqlcipher_extra_shutdown()", __func__);
   sqlcipher_extra_shutdown();
 }
 
@@ -107887,7 +107894,7 @@ static void sqlcipher_fini(void) {
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
   switch (fdwReason) {
     case DLL_PROCESS_DETACH:
-      sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: calling sqlcipher_extra_shutdown()\n", __func__);
+      sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: calling sqlcipher_extra_shutdown()", __func__);
       sqlcipher_extra_shutdown();
       break;
     default:
@@ -107958,7 +107965,7 @@ int sqlcipher_extra_init(const char* arg) {
   for(i = 0; i < SQLCIPHER_MUTEX_COUNT; i++) {
     if(sqlcipher_static_mutex[i] == NULL) {
       if((sqlcipher_static_mutex[i] = sqlite3_mutex_alloc(SQLITE_MUTEX_FAST)) == NULL) {
-        sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_MEMORY, "%s: failed to allocate static mutex %i", __func__, i);
+        sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_MEMORY, "%s: failed to allocate static mutex %d", __func__, i);
         rc = SQLITE_NOMEM;
         goto error;
       }
@@ -108088,10 +108095,6 @@ error:
 void sqlcipher_extra_shutdown(void) {
   int i = 0;
   sqlcipher_provider *provider = NULL;
-  sqlite3_mutex *mutex = sqlite3_mutex_alloc(SQLITE_MUTEX_STATIC_MASTER);
-  if(mutex) {
-    sqlite3_mutex_enter(mutex);
-  }
 
   /* if sqlcipher hasn't been initialized or the shutdown already completed exit early */
   if(!sqlcipher_init || sqlcipher_shutdown) {
@@ -108135,7 +108138,7 @@ void sqlcipher_extra_shutdown(void) {
     if(used > 0) {
       /* don't free the heap so that sqlite treats this as unfreed memory */
       sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_MEMORY,
-        "%s: SQLCipher private heap unfreed memory %u bytes in %d allocations\n", __func__, used, i);
+        "%s: SQLCipher private heap unfreed memory %u bytes in %d allocations", __func__, used, i);
     } else {
       sqlcipher_internal_free(private_heap, private_heap_sz);
       private_heap = NULL;
@@ -108144,6 +108147,10 @@ void sqlcipher_extra_shutdown(void) {
     sqlcipher_internal_free(private_heap, private_heap_sz);
     private_heap = NULL;
 #endif
+    sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_MEMORY,
+        "%s: SQLCipher private heap stats: size=%u, hwm=%u, alloc=%u, allocs=%u, overflow=%u, overflows=%u", __func__,
+        private_heap_sz, private_heap_hwm, private_heap_alloc, private_heap_allocs, private_heap_overflow, private_heap_overflows
+    );
   }
 
   /* free all of sqlcipher's static mutexes */
@@ -108158,9 +108165,6 @@ cleanup:
   sqlcipher_init = 0;
   sqlcipher_init_error = SQLITE_ERROR;
   sqlcipher_shutdown = 1;
-  if(mutex) {
-    sqlite3_mutex_leave(mutex);
-  }
 }
 
 static void sqlcipher_shield(unsigned char *in, int sz) {
@@ -108180,7 +108184,7 @@ void* sqlcipher_memset(void *v, unsigned char value, sqlite_uint64 len) {
 
   if (v == NULL) return v;
 
-  sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MEMORY, "sqlcipher_memset: setting %p[0-%llu]=%d)", a, len, value);
+  sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MEMORY, "sqlcipher_memset: setting %p[0-%u]=%d)", a, len, value);
   for(i = 0; i < len; i++) {
     a[i] = value;
   }
@@ -108356,58 +108360,9 @@ static sqlite3_mem_methods sqlcipher_mem_methods = {
 void sqlcipher_init_memmethods() {
   if(sqlcipher_mem_initialized) return;
   if(sqlite3_config(SQLITE_CONFIG_GETMALLOC, &default_mem_methods) != SQLITE_OK ||
-     sqlite3_config(SQLITE_CONFIG_MALLOC, &sqlcipher_mem_methods)  != SQLITE_OK) {
-     sqlcipher_mem_security_on = sqlcipher_mem_executed = sqlcipher_mem_initialized = 0;
+    sqlite3_config(SQLITE_CONFIG_MALLOC, &sqlcipher_mem_methods)  != SQLITE_OK) {
+    sqlcipher_mem_security_on = sqlcipher_mem_executed = sqlcipher_mem_initialized = 0;
   } else {
-#if !defined(OMIT_MEMLOCK) && defined(_WIN32) && !(defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP || WINAPI_FAMILY == WINAPI_FAMILY_PC_APP))
-    HANDLE process = NULL;
-    SYSTEM_INFO info;
-    SIZE_T dflt_min_size, dflt_max_size, min_size, max_size;
-    DWORD pid = GetCurrentProcessId();
-
-    if(pid == 0) {
-      sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_MEMORY, "sqlcipher_init_memmethods: error calling GetCurrentProcessId: %d", GetLastError());
-      goto cleanup;
-    }
-
-    if((process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_SET_QUOTA, FALSE, pid)) == NULL) {
-      sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_MEMORY, "sqlcipher_init_memmethods: error calling OpenProcess for pid=%d: %d", pid, GetLastError());
-      goto cleanup;
-    }
-
-    /* lookup native memory page size for caclulating default working set sizes */
-    GetNativeSystemInfo(&info);
-
-    /* https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-setprocessworkingsetsize#parameters
-       Default Min Set Size is 50 pages.
-       Default Max Set Size is 345 pages */
-    dflt_min_size = info.dwPageSize * 50;
-    dflt_max_size = info.dwPageSize * 345;
-    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MEMORY, "sqlcipher_init_memmethods: calculated dflt_min_size=%u dflt_max_size=%u for memory page size %d", dflt_min_size, dflt_max_size, info.dwPageSize);
-
-    /* retrieve current min and max set sizes for comparison */
-    if(!GetProcessWorkingSetSize(process, &min_size, &max_size)) {
-      sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_MEMORY, "sqlcipher_init_memmethods: error calling GetProcessWorkingSetSize %d",  GetLastError());
-      goto cleanup;
-    }
-    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MEMORY, "sqlcipher_init_memmethods: GetProcessWorkingSetSize returned min=%u max=%u", min_size, max_size);
-
-    if(min_size == dflt_min_size && max_size == dflt_max_size) {
-      /* application has not set any special non-default working set sizes. Caclulate the new min working set size to be
-         5 times default to allow greater number of pages to be VirtualLocked, max size will be left unchanged */
-      min_size *= 5;
-      if(!SetProcessWorkingSetSize(process, min_size, max_size)) {
-        sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_MEMORY, "sqlcipher_init_memmethods: error calling SetProcessWorkingSetSize with min=%u max=%u: %d", min_size, max_size, GetLastError());
-        goto cleanup;
-      }
-      sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_MEMORY, "sqlcipher_init_memmethods: called SetProcessWorkingSetSize for min=%u max=%u", min_size, max_size);
-    } else {
-      sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_MEMORY, "sqlcipher_init_memmethods: application has custom working set sizes min=%u max=%u - skipped alteration of working set sizes", min_size, max_size);
-    }
-
-cleanup:
-    if (process) CloseHandle(process);
-#endif
     sqlcipher_mem_initialized = 1;
   }
 }
@@ -108490,10 +108445,19 @@ void *sqlcipher_malloc(sqlite3_uint64 size) {
   /* If we were unable to locate a free block large enough to service the request, the fallback
      behavior will simply attempt to allocate additional memory using malloc. */
   if(alloc == NULL) {
+    private_heap_overflow += size;
+    private_heap_overflows++;
     alloc = sqlcipher_internal_malloc(size);
-    sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_MEMORY, "%s: unable to allocate %llu bytes on private heap, allocated %p using sqlcipher_internal_malloc fallback", __func__, size, alloc);
+    sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_MEMORY, "%s: unable to allocate %u bytes on private heap, allocated %p using sqlcipher_internal_malloc fallback", __func__, size, alloc);
   } else {
-    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MEMORY, "%s allocated %llu bytes on private heap at %p", __func__, size, alloc);
+    private_heap_used += size;
+    if(private_heap_used > private_heap_hwm) {
+      /* if the current bytes allocated on the private heap are greater than the high water mark, set the HWM to the new amount */
+      private_heap_hwm = private_heap_used;
+    }
+    private_heap_alloc += size;
+    private_heap_allocs++;
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MEMORY, "%s allocated %u bytes on private heap at %p", __func__, size, alloc);
   }
 
   return alloc;
@@ -108502,6 +108466,7 @@ void *sqlcipher_malloc(sqlite3_uint64 size) {
 void sqlcipher_free(void *mem, sqlite3_uint64 sz) {
   private_block *block = NULL, *prev = NULL;
   void *alloc = NULL;
+  u32 block_size = 0;
   block = (private_block *) private_heap;
 
   sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: entering SQLCIPHER_MUTEX_MEM", __func__);
@@ -108516,6 +108481,7 @@ void sqlcipher_free(void *mem, sqlite3_uint64 sz) {
        on to the next block */
     if(mem == alloc) {
       block->is_used = 0;
+      block_size = block->size; /* retain the acual size of the block in use for stats adjustment */
       xoshiro_randomness(alloc, block->size);
 
       /* check whether the previous block is free, if so merge*/
@@ -108549,10 +108515,11 @@ void sqlcipher_free(void *mem, sqlite3_uint64 sz) {
      then it was allocated by the fallback mechanism and should
      be deallocated with free() */
   if(!block) {
-    sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_MEMORY, "%s: unable to find %p with %llu bytes on private heap, calling sqlcipher_internal_free fallback", __func__, mem, sz);
+    sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_MEMORY, "%s: unable to find %p with %u bytes on private heap, calling sqlcipher_internal_free fallback", __func__, mem, sz);
     sqlcipher_internal_free(mem, sz);
   } else {
-    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MEMORY, "%s freed %llu bytes on private heap at %p", __func__, sz, mem);
+    private_heap_used -= block_size;
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MEMORY, "%s freed %u bytes (%u total) on private heap at %p", __func__, sz, block_size, mem);
   }
 }
 
@@ -108919,13 +108886,13 @@ static int sqlcipher_codec_ctx_set_kdf_algorithm(codec_ctx *ctx, int algorithm) 
 
 static void sqlcipher_codec_ctx_set_error(codec_ctx *ctx, int error) {
   sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_CORE, "sqlcipher_codec_ctx_set_error %d", error);
-  sqlite3pager_error(ctx->pBt->pBt->pPager, error);
+  sqlite3pager_error(sqlite3BtreePager(ctx->pBt), error);
   ctx->pBt->pBt->db->errCode = error;
   ctx->error = error;
 }
 
 static int sqlcipher_codec_ctx_init_kdf_salt(codec_ctx *ctx) {
-  sqlite3_file *fd = sqlite3PagerFile(ctx->pBt->pBt->pPager);
+  sqlite3_file *fd = sqlite3PagerFile(sqlite3BtreePager(ctx->pBt));
 
   if(SQLCIPHER_FLAG_GET(ctx->flags, CIPHER_FLAG_HAS_KDF_SALT)) {
     return SQLITE_OK; /* don't reload salt when not needed */
@@ -109474,7 +109441,7 @@ static int sqlcipher_codec_ctx_integrity_check(codec_ctx *ctx, Parse *pParse, ch
   int rc = 0;
   char *result;
   unsigned char *hmac_out = NULL;
-  sqlite3_file *fd = sqlite3PagerFile(ctx->pBt->pBt->pPager);
+  sqlite3_file *fd = sqlite3PagerFile(sqlite3BtreePager(ctx->pBt));
   i64 file_sz;
 
   Vdbe *v = sqlite3GetVdbe(pParse);
@@ -109508,7 +109475,7 @@ static int sqlcipher_codec_ctx_integrity_check(codec_ctx *ctx, Parse *pParse, ch
     int read_sz = ctx->page_sz;
 
     /* skip integrity check on PAGER_SJ_PGNO since it will have no valid content */
-    if(sqlite3pager_is_sj_pgno(ctx->pBt->pBt->pPager, page)) continue;
+    if(sqlite3pager_is_sj_pgno(sqlite3BtreePager(ctx->pBt), page)) continue;
 
     if(page==1) {
       int page1_offset = ctx->plaintext_header_sz ? ctx->plaintext_header_sz : FILE_HEADER_SZ;
@@ -109673,8 +109640,8 @@ migrate:
   SQLCIPHER_FLAG_UNSET(ctx->flags, CIPHER_FLAG_KEY_USED);
   sqlcipherCodecAttach(db, 0, keyspec, keyspec_sz);
 
-  srcfile = sqlite3PagerFile(pSrc->pBt->pPager);
-  destfile = sqlite3PagerFile(pDest->pBt->pPager);
+  srcfile = sqlite3PagerFile(sqlite3BtreePager(pSrc));
+  destfile = sqlite3PagerFile(sqlite3BtreePager(pDest));
 
   sqlite3OsClose(srcfile);
   sqlite3OsClose(destfile);
@@ -109716,11 +109683,10 @@ migrate:
     goto handle_error;
   }
 
-  sqlite3pager_reset(pDest->pBt->pPager);
+  sqlite3pager_reset(sqlite3BtreePager(pDest));
   sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "sqlcipher_codec_ctx_migrate: reset pager");
 
 handle_error:
-cleanup:
   rc_cleanup = sqlite3_exec(db, "DETACH DATABASE migrate;", NULL, NULL, NULL);
   if(rc_cleanup != SQLITE_OK) {
     sqlcipher_log(SQLCIPHER_LOG_WARN, SQLCIPHER_LOG_CORE, "sqlcipher_codec_ctx_migrate: DETACH DATABASE migrate failed: %d", rc_cleanup);
@@ -109753,10 +109719,11 @@ cleanup:
 
   if(rc != SQLITE_OK) {
     sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_CORE, "sqlcipher_codec_ctx_migrate: an error occurred attempting to migrate the database - last error %d", rc);
-    sqlite3pager_reset(ctx->pBt->pBt->pPager);
+    sqlite3pager_reset(sqlite3BtreePager(ctx->pBt));
     ctx->error = rc; /* set flag for deferred error */
   }
 
+cleanup:
   if(pass) sqlcipher_free(pass, pass_sz);
   if(keyspec) sqlcipher_free(keyspec, keyspec_sz);
   if(attach_command) sqlcipher_free(attach_command, sqlite3Strlen30(attach_command));
@@ -110054,7 +110021,7 @@ static int codec_set_pass_key(sqlite3* db, int nDb, const void *zKey, int nKey, 
   struct Db *pDb = &db->aDb[nDb];
   sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "codec_set_pass_key: db=%p nDb=%d for_ctx=%d", db, nDb, for_ctx);
   if(pDb->pBt) {
-    codec_ctx *ctx = (codec_ctx*) sqlcipherPagerGetCodec(pDb->pBt->pBt->pPager);
+    codec_ctx *ctx = (codec_ctx*) sqlcipherPagerGetCodec(sqlite3BtreePager(pDb->pBt));
 
     if(ctx) {
       return sqlcipher_codec_ctx_set_pass(ctx, zKey, nKey, for_ctx);
@@ -110073,7 +110040,7 @@ int sqlcipher_codec_pragma(sqlite3* db, int iDb, Parse *pParse, const char *zLef
   int rc;
 
   if(pDb->pBt) {
-    ctx = (codec_ctx*) sqlcipherPagerGetCodec(pDb->pBt->pBt->pPager);
+    ctx = (codec_ctx*) sqlcipherPagerGetCodec(sqlite3BtreePager(pDb->pBt));
   }
 
   if(sqlite3_stricmp(zLeft, "key") !=0 && sqlite3_stricmp(zLeft, "rekey") != 0) {
@@ -110715,20 +110682,30 @@ static void* sqlite3Codec(void *iCtx, void *data, Pgno pgno, int mode) {
   int offset = 0, rc = 0;
   unsigned char *pData = (unsigned char *) data;
   int cctx = CIPHER_READ_CTX;
+  void *out = NULL;
+  sqlite3_mutex *mutex = ctx->pBt->sharable ? sqlcipher_mutex(SQLCIPHER_MUTEX_SHAREDCACHE) : NULL;
+
+  /* in shared cache mode, this needs to be mutexed to prevent a separate database handle from
+   * nuking the context on the shared Btree */
+  if(mutex) {
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: entering mutex %p", __func__, mutex);
+    sqlite3_mutex_enter(mutex);
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: entered mutex %p", __func__, mutex);
+  }
 
   sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "sqlite3Codec: pgno=%d, mode=%d, ctx->page_sz=%d", pgno, mode, ctx->page_sz);
 
   if(ctx->error != SQLITE_OK) {
     sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_CORE, "%s: identified deferred error condition: %d", __func__, rc);
     sqlcipher_codec_ctx_set_error(ctx, ctx->error);
-    return NULL;
+    goto cleanup;
   }
 
   /* call to derive keys if not present yet */
   if((rc = sqlcipher_codec_key_derive(ctx)) != SQLITE_OK) {
-   sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_CORE, "sqlite3Codec: error occurred during key derivation: %d", rc);
-   sqlcipher_codec_ctx_set_error(ctx, rc);
-   return NULL;
+    sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_CORE, "sqlite3Codec: error occurred during key derivation: %d", rc);
+    sqlcipher_codec_ctx_set_error(ctx, rc);
+    goto cleanup;
   }
 
   /* if the plaintext_header_size is negative that means an invalid size was set via
@@ -110737,7 +110714,7 @@ static void* sqlite3Codec(void *iCtx, void *data, Pgno pgno, int mode) {
   if(ctx->plaintext_header_sz < 0) {
     sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_CORE, "sqlite3Codec: error invalid ctx->plaintext_header_sz: %d", ctx->plaintext_header_sz);
     sqlcipher_codec_ctx_set_error(ctx, SQLITE_ERROR);
-    return NULL;
+    goto cleanup;
   }
 
   if(pgno == 1) /* adjust starting pointers in data page for header offset on first page*/
@@ -110754,7 +110731,7 @@ static void* sqlite3Codec(void *iCtx, void *data, Pgno pgno, int mode) {
 #ifdef SQLCIPHER_TEST
       if((cipher_test_flags & TEST_FAIL_DECRYPT) > 0 && sqlcipher_get_test_fail()) {
         rc = SQLITE_ERROR;
-        sqlcipher_log(SQLCIPHER_LOG_WARN, SQLCIPHER_LOG_CORE, "sqlite3Codec: simulating decryption failure for pgno=%d, mode=%d, ctx->page_sz=%d\n", pgno, mode, ctx->page_sz);
+        sqlcipher_log(SQLCIPHER_LOG_WARN, SQLCIPHER_LOG_CORE, "sqlite3Codec: simulating decryption failure for pgno=%d, mode=%d, ctx->page_sz=%d", pgno, mode, ctx->page_sz);
       }
 #endif
       if(rc != SQLITE_OK) {
@@ -110773,7 +110750,8 @@ static void* sqlite3Codec(void *iCtx, void *data, Pgno pgno, int mode) {
         SQLCIPHER_FLAG_SET(ctx->flags, CIPHER_FLAG_KEY_USED);
       }
       memcpy(pData, ctx->buffer, ctx->page_sz); /* copy buffer data back to pData and return */
-      return pData;
+      out = pData;
+      goto cleanup;
       break;
 
     case CODEC_WRITE_OP: /* encrypt database page, operate on write context and fall through to case 7, so the write context is used*/
@@ -110786,7 +110764,7 @@ static void* sqlite3Codec(void *iCtx, void *data, Pgno pgno, int mode) {
         if((rc = sqlcipher_codec_ctx_get_kdf_salt(ctx, &kdf_salt)) != SQLITE_OK) {
           sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_CORE, "sqlite3Codec: error retrieving salt: %d", rc);
           sqlcipher_codec_ctx_set_error(ctx, rc);
-          return NULL;
+          goto cleanup;
         }
         memcpy(ctx->buffer, ctx->plaintext_header_sz ? pData : kdf_salt, offset);
       }
@@ -110794,7 +110772,7 @@ static void* sqlite3Codec(void *iCtx, void *data, Pgno pgno, int mode) {
 #ifdef SQLCIPHER_TEST
       if((cipher_test_flags & TEST_FAIL_ENCRYPT) > 0 && sqlcipher_get_test_fail()) {
         rc = SQLITE_ERROR;
-        sqlcipher_log(SQLCIPHER_LOG_WARN, SQLCIPHER_LOG_CORE, "sqlite3Codec: simulating encryption failure for pgno=%d, mode=%d, ctx->page_sz=%d\n", pgno, mode, ctx->page_sz);
+        sqlcipher_log(SQLCIPHER_LOG_WARN, SQLCIPHER_LOG_CORE, "sqlite3Codec: simulating encryption failure for pgno=%d, mode=%d, ctx->page_sz=%d", pgno, mode, ctx->page_sz);
       }
 #endif
       if(rc != SQLITE_OK) {
@@ -110803,24 +110781,53 @@ static void* sqlite3Codec(void *iCtx, void *data, Pgno pgno, int mode) {
         sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_CORE, "sqlite3Codec: error encrypting page %d data: %d", pgno, rc);
         sqlcipher_memset((unsigned char*)ctx->buffer+offset, 0, ctx->page_sz-offset);
         sqlcipher_codec_ctx_set_error(ctx, rc);
-        return NULL;
+        goto cleanup;
       }
       SQLCIPHER_FLAG_SET(ctx->flags, CIPHER_FLAG_KEY_USED);
-      return ctx->buffer; /* return persistent buffer data, pData remains intact */
+      out = ctx->buffer; /* return persistent buffer data, pData remains intact */
+      goto cleanup;
       break;
 
     default:
       sqlcipher_log(SQLCIPHER_LOG_ERROR, SQLCIPHER_LOG_CORE, "sqlite3Codec: error unsupported codec mode %d", mode);
       sqlcipher_codec_ctx_set_error(ctx, SQLITE_ERROR); /* unsupported mode, set error */
-      return pData;
+      out = pData;
+      goto cleanup;
       break;
   }
+
+cleanup:
+  if(mutex) {
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: leaving mutex %p", __func__, mutex);
+    sqlite3_mutex_leave(mutex);
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: left mutex %p", __func__, mutex);
+  }
+  return out;
 }
 
+/* This callback will be invoked when a database connection is closed. It is basically a light wrapper
+ * ariund sqlciher_codec_ctx_free that locks the shared cache mutex if necessary */
 static void sqlite3FreeCodecArg(void *pCodecArg) {
   codec_ctx *ctx = (codec_ctx *) pCodecArg;
+  sqlite3_mutex *mutex = ctx->pBt->sharable ? sqlcipher_mutex(SQLCIPHER_MUTEX_SHAREDCACHE) : NULL;
+
   if(pCodecArg == NULL) return;
+
+  /* in shared cache mode, this needs to be mutexed to prevent a codec context from being deallocated when
+   * it is in use by the codec due to cross-database handle access to the shared Btree */
+  if(mutex) {
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: entering mutex %p", __func__, mutex);
+    sqlite3_mutex_enter(mutex);
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: entered mutex %p", __func__, mutex);
+  }
+
   sqlcipher_codec_ctx_free(&ctx); /* wipe and free allocated memory for the context */
+
+  if(mutex) {
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: leaving mutex %p", __func__, mutex);
+    sqlite3_mutex_leave(mutex);
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: left mutex %p", __func__, mutex);
+  }
 }
 
 int sqlcipherCodecAttach(sqlite3* db, int nDb, const void *zKey, int nKey) {
@@ -110829,6 +110836,7 @@ int sqlcipherCodecAttach(sqlite3* db, int nDb, const void *zKey, int nKey) {
   codec_ctx *ctx = NULL;
   Pager *pPager = NULL;
   int rc = SQLITE_OK;
+  sqlite3_mutex *extra_mutex = NULL;
 
   sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: db=%p, nDb=%d", __func__, db, nDb);
 
@@ -110848,24 +110856,58 @@ int sqlcipherCodecAttach(sqlite3* db, int nDb, const void *zKey, int nKey) {
     return SQLITE_MISUSE;
   }
 
+  /* After this point, early returns for API misuse are complete, lock on a mutex and ensure it is cleaned
+   * up later. If shared cache is enabled then enter a specially defined "global" recursive mutex specifically
+   * for isolating shared cache connections, otherwise use the built-in databse mutex */
+  extra_mutex = pDb->pBt->sharable ? sqlcipher_mutex(SQLCIPHER_MUTEX_SHAREDCACHE) : NULL;
+
   sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: entering database mutex %p", __func__, db->mutex);
   sqlite3_mutex_enter(db->mutex);
   sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: entered database mutex %p", __func__, db->mutex);
 
-  pPager = pDb->pBt->pBt->pPager;
-  ctx = (codec_ctx*) sqlcipherPagerGetCodec(pDb->pBt->pBt->pPager);
+  if(extra_mutex) {
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: entering mutex %p", __func__, extra_mutex);
+    sqlite3_mutex_enter(extra_mutex);
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: entered mutex %p", __func__, extra_mutex);
+  }
 
-  if(ctx != NULL && SQLCIPHER_FLAG_GET(ctx->flags, CIPHER_FLAG_KEY_USED)) {
-    /* there is already a codec attached to this database, so we should not proceed */
-    sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_CORE, "%s: disregarding attempt to set key on an previously keyed database connection handle", __func__);
-    goto cleanup;
+  pPager = sqlite3BtreePager(pDb->pBt);
+  ctx = (codec_ctx*) sqlcipherPagerGetCodec(pPager);
+
+  if(ctx != NULL) {
+    /* There is already a codec attached to this database */
+    if(SQLCIPHER_FLAG_GET(ctx->flags, CIPHER_FLAG_KEY_USED)) {
+       /* The key was derived and used successfully, so return early */
+      sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_CORE, "%s: disregarding attempt to set key on an previously keyed database connection handle", __func__);
+      goto cleanup;
+#ifndef SQLITE_DEBUG
+    } else if (pDb->pBt->sharable) {
+      /* This Btree is participating in shared cache. It would be usafe to reset and reattach a new codec, so return early.
+       *
+       * When compiled with SQLITE_DEBUG, all database connections have shared cached enabled. This behavior of disallowing reset
+       * of the codec on a shared cache connection will break several tests that depend on the the ability to reset the codec,
+       * like migration tests, repeat-keying tests, etc. Asa result we will disable shared cache handling when compiled with
+       * SQLIE_DEBUG enabled.*/
+      sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_CORE, "%s: disregarding attempt to set key on an shared cache handle", __func__);
+      goto cleanup;
+#endif
+    } else {
+      /* To preseve legacy functionality where an incorrect key could be replaced by a correct key without closing the database,
+       * if the key has not been used, and shared cache is not enabled, reset the codec on this pager entirely.
+       * This will call sqlcipher_codec_ctx_free directly instead of through sqlite3FreeCodecArg because this function already
+       * holds the shared cache mutex if it is necessary, and that avoids requiring a more expensive recursive mutex */
+      sqlcipher_log(SQLCIPHER_LOG_INFO, SQLCIPHER_LOG_CORE, "%s: resetting existing codec on pager", __func__);
+      sqlcipher_codec_ctx_free(&ctx);
+      sqlcipherPagerSetCodec(pPager, NULL, NULL, NULL, NULL);
+      ctx = NULL;
+    }
   }
 
   /* check if the sqlite3_file is open, and if not force handle to NULL */
   if((fd = sqlite3PagerFile(pPager))->pMethods == 0) fd = NULL;
 
   /* point the internal codec argument against the contet to be prepared */
-  rc = sqlcipher_codec_ctx_init(&ctx, pDb, pDb->pBt->pBt->pPager, zKey, nKey);
+  rc = sqlcipher_codec_ctx_init(&ctx, pDb, pPager, zKey, nKey);
 
   if(rc != SQLITE_OK) {
     /* initialization failed, do not attach potentially corrupted context */
@@ -110878,14 +110920,14 @@ int sqlcipherCodecAttach(sqlite3* db, int nDb, const void *zKey, int nKey) {
   }
 
   sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: calling sqlcipherPagerSetCodec()", __func__);
-  sqlcipherPagerSetCodec(sqlite3BtreePager(pDb->pBt), sqlite3Codec, NULL, sqlite3FreeCodecArg, (void *) ctx);
+  sqlcipherPagerSetCodec(pPager, sqlite3Codec, NULL, sqlite3FreeCodecArg, (void *) ctx);
 
   codec_set_btree_to_codec_pagesize(db, pDb, ctx);
 
   /* force secure delete. This has the benefit of wiping internal data when deleted
      and also ensures that all pages are written to disk (i.e. not skipped by
      sqlite3PagerDontWrite optimizations) */
-  sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: calling sqlite3BtreeSecureDelete(), __func__");
+  sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "%s: calling sqlite3BtreeSecureDelete()", __func__);
   sqlite3BtreeSecureDelete(pDb->pBt, 1);
 
   /* if fd is null, then this is an in-memory database and
@@ -110897,6 +110939,13 @@ int sqlcipherCodecAttach(sqlite3* db, int nDb, const void *zKey, int nKey) {
   }
 
 cleanup:
+
+  if(extra_mutex) {
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: leaving mutex %p", __func__, extra_mutex);
+    sqlite3_mutex_leave(extra_mutex);
+    sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: left mutex %p", __func__, extra_mutex);
+  }
+
   sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: leaving database mutex %p", __func__, db->mutex);
   sqlite3_mutex_leave(db->mutex);
   sqlcipher_log(SQLCIPHER_LOG_TRACE, SQLCIPHER_LOG_MUTEX, "%s: left database mutex %p", __func__, db->mutex);
@@ -110965,9 +111014,9 @@ SQLITE_API int sqlite3_rekey_v2(sqlite3 *db, const char *zDb, const void *pKey, 
       int rc, page_count;
       Pgno pgno;
       PgHdr *page;
-      Pager *pPager = pDb->pBt->pBt->pPager;
+      Pager *pPager = sqlite3BtreePager(pDb->pBt);
 
-      ctx = (codec_ctx*) sqlcipherPagerGetCodec(pDb->pBt->pBt->pPager);
+      ctx = (codec_ctx*) sqlcipherPagerGetCodec(pPager);
 
       if(ctx == NULL) {
         /* there was no codec attached to this database, so this should do nothing! */
@@ -111038,7 +111087,7 @@ void sqlcipherCodecGetKey(sqlite3* db, int nDb, void **zKey, int *nKey) {
   struct Db *pDb = &db->aDb[nDb];
   sqlcipher_log(SQLCIPHER_LOG_DEBUG, SQLCIPHER_LOG_CORE, "sqlcipherCodecGetKey:db=%p, nDb=%d", db, nDb);
   if( pDb->pBt ) {
-    codec_ctx *ctx = (codec_ctx*) sqlcipherPagerGetCodec(pDb->pBt->pBt->pPager);
+    codec_ctx *ctx = (codec_ctx*) sqlcipherPagerGetCodec(sqlite3BtreePager(pDb->pBt));
 
     if(ctx) {
       /* if the key has not been derived yet, or the key is stored (vi PRAGMA cipher_store_pass)
@@ -121081,11 +121130,11 @@ SQLITE_PRIVATE void sqlite3ExprIfTrue(Parse *pParse, Expr *pExpr, int dest, int 
       assert( TK_ISNULL==OP_IsNull );   testcase( op==TK_ISNULL );
       assert( TK_NOTNULL==OP_NotNull ); testcase( op==TK_NOTNULL );
       r1 = sqlite3ExprCodeTemp(pParse, pExpr->pLeft, &regFree1);
-      sqlite3VdbeTypeofColumn(v, r1);
+      assert( regFree1==0 || regFree1==r1 );
+      if( regFree1 ) sqlite3VdbeTypeofColumn(v, r1);
       sqlite3VdbeAddOp2(v, op, r1, dest);
       VdbeCoverageIf(v, op==TK_ISNULL);
       VdbeCoverageIf(v, op==TK_NOTNULL);
-      testcase( regFree1==0 );
       break;
     }
     case TK_BETWEEN: {
@@ -121256,11 +121305,11 @@ SQLITE_PRIVATE void sqlite3ExprIfFalse(Parse *pParse, Expr *pExpr, int dest, int
     case TK_ISNULL:
     case TK_NOTNULL: {
       r1 = sqlite3ExprCodeTemp(pParse, pExpr->pLeft, &regFree1);
-      sqlite3VdbeTypeofColumn(v, r1);
+      assert( regFree1==0 || regFree1==r1 );
+      if( regFree1 ) sqlite3VdbeTypeofColumn(v, r1);
       sqlite3VdbeAddOp2(v, op, r1, dest);
       testcase( op==TK_ISNULL );   VdbeCoverageIf(v, op==TK_ISNULL);
       testcase( op==TK_NOTNULL );  VdbeCoverageIf(v, op==TK_NOTNULL);
-      testcase( regFree1==0 );
       break;
     }
     case TK_BETWEEN: {
@@ -131995,6 +132044,7 @@ SQLITE_PRIVATE void sqlite3CreateIndex(
       assert( j<=0x7fff );
       if( j<0 ){
         j = pTab->iPKey;
+        pIndex->bIdxRowid = 1;
       }else{
         if( pTab->aCol[j].notNull==0 ){
           pIndex->uniqNotNull = 0;
@@ -144792,48 +144842,48 @@ static const char *const pragCName[] = {
   /*  13 */ "pk",
   /*  14 */ "hidden",
                            /* table_info reuses 8 */
-  /*  15 */ "schema",      /* Used by: table_list */
-  /*  16 */ "name",
+  /*  15 */ "name",        /* Used by: function_list */
+  /*  16 */ "builtin",
   /*  17 */ "type",
-  /*  18 */ "ncol",
-  /*  19 */ "wr",
-  /*  20 */ "strict",
-  /*  21 */ "seqno",       /* Used by: index_xinfo */
-  /*  22 */ "cid",
-  /*  23 */ "name",
-  /*  24 */ "desc",
-  /*  25 */ "coll",
-  /*  26 */ "key",
-  /*  27 */ "name",        /* Used by: function_list */
-  /*  28 */ "builtin",
-  /*  29 */ "type",
-  /*  30 */ "enc",
-  /*  31 */ "narg",
-  /*  32 */ "flags",
-  /*  33 */ "tbl",         /* Used by: stats */
-  /*  34 */ "idx",
-  /*  35 */ "wdth",
-  /*  36 */ "hght",
-  /*  37 */ "flgs",
-  /*  38 */ "seq",         /* Used by: index_list */
-  /*  39 */ "name",
-  /*  40 */ "unique",
-  /*  41 */ "origin",
-  /*  42 */ "partial",
+  /*  18 */ "enc",
+  /*  19 */ "narg",
+  /*  20 */ "flags",
+  /*  21 */ "schema",      /* Used by: table_list */
+  /*  22 */ "name",
+  /*  23 */ "type",
+  /*  24 */ "ncol",
+  /*  25 */ "wr",
+  /*  26 */ "strict",
+  /*  27 */ "seqno",       /* Used by: index_xinfo */
+  /*  28 */ "cid",
+  /*  29 */ "name",
+  /*  30 */ "desc",
+  /*  31 */ "coll",
+  /*  32 */ "key",
+  /*  33 */ "seq",         /* Used by: index_list */
+  /*  34 */ "name",
+  /*  35 */ "unique",
+  /*  36 */ "origin",
+  /*  37 */ "partial",
+  /*  38 */ "tbl",         /* Used by: stats */
+  /*  39 */ "idx",
+  /*  40 */ "wdth",
+  /*  41 */ "hght",
+  /*  42 */ "flgs",
   /*  43 */ "table",       /* Used by: foreign_key_check */
   /*  44 */ "rowid",
   /*  45 */ "parent",
   /*  46 */ "fkid",
-                           /* index_info reuses 21 */
-  /*  47 */ "seq",         /* Used by: database_list */
-  /*  48 */ "name",
-  /*  49 */ "file",
-  /*  50 */ "busy",        /* Used by: wal_checkpoint */
-  /*  51 */ "log",
-  /*  52 */ "checkpointed",
-                           /* collation_list reuses 38 */
+  /*  47 */ "busy",        /* Used by: wal_checkpoint */
+  /*  48 */ "log",
+  /*  49 */ "checkpointed",
+  /*  50 */ "seq",         /* Used by: database_list */
+  /*  51 */ "name",
+  /*  52 */ "file",
+                           /* index_info reuses 27 */
   /*  53 */ "database",    /* Used by: lock_status */
   /*  54 */ "status",
+                           /* collation_list reuses 33 */
   /*  55 */ "cache_size",  /* Used by: default_cache_size */
                            /* module_list pragma_list reuses 9 */
   /*  56 */ "timeout",     /* Used by: busy_timeout */
@@ -144926,7 +144976,7 @@ static const PragmaName aPragmaName[] = {
  {/* zName:     */ "collation_list",
   /* ePragTyp:  */ PragTyp_COLLATION_LIST,
   /* ePragFlg:  */ PragFlg_Result0,
-  /* ColNames:  */ 38, 2,
+  /* ColNames:  */ 33, 2,
   /* iArg:      */ 0 },
 #endif
 #if !defined(SQLITE_OMIT_COMPILEOPTION_DIAGS)
@@ -144961,7 +145011,7 @@ static const PragmaName aPragmaName[] = {
  {/* zName:     */ "database_list",
   /* ePragTyp:  */ PragTyp_DATABASE_LIST,
   /* ePragFlg:  */ PragFlg_Result0,
-  /* ColNames:  */ 47, 3,
+  /* ColNames:  */ 50, 3,
   /* iArg:      */ 0 },
 #endif
 #if !defined(SQLITE_OMIT_PAGER_PRAGMAS) && !defined(SQLITE_OMIT_DEPRECATED)
@@ -145041,7 +145091,7 @@ static const PragmaName aPragmaName[] = {
  {/* zName:     */ "function_list",
   /* ePragTyp:  */ PragTyp_FUNCTION_LIST,
   /* ePragFlg:  */ PragFlg_Result0,
-  /* ColNames:  */ 27, 6,
+  /* ColNames:  */ 15, 6,
   /* iArg:      */ 0 },
 #endif
 #endif
@@ -145084,17 +145134,17 @@ static const PragmaName aPragmaName[] = {
  {/* zName:     */ "index_info",
   /* ePragTyp:  */ PragTyp_INDEX_INFO,
   /* ePragFlg:  */ PragFlg_NeedSchema|PragFlg_Result1|PragFlg_SchemaOpt,
-  /* ColNames:  */ 21, 3,
+  /* ColNames:  */ 27, 3,
   /* iArg:      */ 0 },
  {/* zName:     */ "index_list",
   /* ePragTyp:  */ PragTyp_INDEX_LIST,
   /* ePragFlg:  */ PragFlg_NeedSchema|PragFlg_Result1|PragFlg_SchemaOpt,
-  /* ColNames:  */ 38, 5,
+  /* ColNames:  */ 33, 5,
   /* iArg:      */ 0 },
  {/* zName:     */ "index_xinfo",
   /* ePragTyp:  */ PragTyp_INDEX_INFO,
   /* ePragFlg:  */ PragFlg_NeedSchema|PragFlg_Result1|PragFlg_SchemaOpt,
-  /* ColNames:  */ 21, 6,
+  /* ColNames:  */ 27, 6,
   /* iArg:      */ 1 },
 #endif
 #if !defined(SQLITE_OMIT_INTEGRITY_CHECK)
@@ -145293,7 +145343,7 @@ static const PragmaName aPragmaName[] = {
  {/* zName:     */ "stats",
   /* ePragTyp:  */ PragTyp_STATS,
   /* ePragFlg:  */ PragFlg_NeedSchema|PragFlg_Result0|PragFlg_SchemaReq,
-  /* ColNames:  */ 33, 5,
+  /* ColNames:  */ 38, 5,
   /* iArg:      */ 0 },
 #endif
 #if !defined(SQLITE_OMIT_PAGER_PRAGMAS)
@@ -145312,7 +145362,7 @@ static const PragmaName aPragmaName[] = {
  {/* zName:     */ "table_list",
   /* ePragTyp:  */ PragTyp_TABLE_LIST,
   /* ePragFlg:  */ PragFlg_NeedSchema|PragFlg_Result1,
-  /* ColNames:  */ 15, 6,
+  /* ColNames:  */ 21, 6,
   /* iArg:      */ 0 },
  {/* zName:     */ "table_xinfo",
   /* ePragTyp:  */ PragTyp_TABLE_INFO,
@@ -145403,7 +145453,7 @@ static const PragmaName aPragmaName[] = {
  {/* zName:     */ "wal_checkpoint",
   /* ePragTyp:  */ PragTyp_WAL_CHECKPOINT,
   /* ePragFlg:  */ PragFlg_NeedSchema,
-  /* ColNames:  */ 50, 3,
+  /* ColNames:  */ 47, 3,
   /* iArg:      */ 0 },
 #endif
 #if !defined(SQLITE_OMIT_FLAG_PRAGMAS)
@@ -152845,6 +152895,7 @@ static int multiSelect(
 multi_select_end:
   pDest->iSdst = dest.iSdst;
   pDest->nSdst = dest.nSdst;
+  pDest->iSDParm2 = dest.iSDParm2;
   if( pDelete ){
     sqlite3ParserAddCleanup(pParse, sqlite3SelectDeleteGeneric, pDelete);
   }
@@ -156799,6 +156850,7 @@ static void agginfoFree(sqlite3 *db, void *pArg){
 **   *  There is no WHERE or GROUP BY or HAVING clauses on the subqueries
 **   *  The outer query is a simple count(*) with no WHERE clause or other
 **      extraneous syntax.
+**   *  None of the subqueries are DISTINCT (forumpost/a860f5fb2e 2025-03-10)
 **
 ** Return TRUE if the optimization is undertaken.
 */
@@ -156831,7 +156883,11 @@ static int countOfViewOptimization(Parse *pParse, Select *p){
     if( pSub->op!=TK_ALL && pSub->pPrior ) return 0;  /* Must be UNION ALL */
     if( pSub->pWhere ) return 0;                      /* No WHERE clause */
     if( pSub->pLimit ) return 0;                      /* No LIMIT clause */
-    if( pSub->selFlags & SF_Aggregate ) return 0;     /* Not an aggregate */
+    if( pSub->selFlags & (SF_Aggregate|SF_Distinct) ){
+       testcase( pSub->selFlags & SF_Aggregate );
+       testcase( pSub->selFlags & SF_Distinct );
+       return 0;     /* Not an aggregate nor DISTINCT */
+    }
     assert( pSub->pHaving==0 );  /* Due to the previous */
     pSub = pSub->pPrior;                              /* Repeat over compound */
   }while( pSub );
@@ -172668,7 +172724,7 @@ static int whereLoopAddBtreeIndex(
     if( (pNew->wsFlags & WHERE_TOP_LIMIT)==0
      && pNew->u.btree.nEq<pProbe->nColumn
      && (pNew->u.btree.nEq<pProbe->nKeyCol ||
-           pProbe->idxType!=SQLITE_IDXTYPE_PRIMARYKEY)
+          (pProbe->idxType!=SQLITE_IDXTYPE_PRIMARYKEY && !pProbe->bIdxRowid))
     ){
       if( pNew->u.btree.nEq>3 ){
         sqlite3ProgressCheck(pParse);
@@ -261703,7 +261759,7 @@ static void fts5SourceIdFunc(
 ){
   assert( nArg==0 );
   UNUSED_PARAM2(nArg, apUnused);
-  sqlite3_result_text(pCtx, "fts5: 2025-02-18 13:38:58 873d4e274b4988d260ba8354a9718324a1c26187a4ab4c1cc0227c03d0f10e70", -1, SQLITE_TRANSIENT);
+  sqlite3_result_text(pCtx, "fts5: 2025-05-07 10:39:52 17144570b0d96ae63cd6f3edca39e27ebd74925252bbaf6723bcb2f6b4861fb1", -1, SQLITE_TRANSIENT);
 }
 
 /*
