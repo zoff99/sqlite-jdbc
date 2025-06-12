@@ -22,7 +22,7 @@ SQLITE_HEADER?=$(SQLITE_SOURCE)/sqlite3.h
 
 SQLITE_INCLUDE := $(shell dirname "$(SQLITE_HEADER)")
 
-CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
+CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS) -Wl,-z,max-page-size=16384
 
 $(TARGET)/common-lib/org/sqlite/%.class: src/main/java/org/sqlite/%.java
 	@mkdir -p $(@D)
