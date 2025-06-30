@@ -11,6 +11,8 @@ https://jitpack.io/#zoff99/pkgs_zoffccAndroidJDBC
 
 currently it works on Android API 21 and above.
 
+<img src="https://raw.githubusercontent.com/zoff99/sqlite-jdbc/refs/heads/android_test/sqlite-jdbc_coms.png" width="300">
+
 ### Automated Screenshots taken from CI
 
 <img src="https://github.com/zoff99/sqlite-jdbc/releases/download/nightly/android_screen01_21.png" height="400"></a>
