@@ -7,7 +7,7 @@ RESOURCE_DIR = src/main/resources
 
 all: jni-header package
 
-deploy: 
+deploy:
 	echo dummy
 	# mvn package deploy -DperformRelease=true
 
