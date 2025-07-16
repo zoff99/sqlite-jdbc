@@ -1,0 +1,107 @@
+include VERSION
+
+ifndef JAVA_HOME
+$(warning Set JAVA_HOME environment variable)
+endif
+
+JAVA  := "$$JAVA_HOME/bin/java"
+JAVAC := "$$JAVA_HOME/bin/javac" 
+JAVAH := "$$JAVA_HOME/bin/javah"
+
+TARGET := target
+SRC:=src/main/java
+OSINFO_CLASS := org.sqlite.util.OSInfo
+OSINFO_PROG := lib/org/sqlite/util/OSInfo.class
+
+# Windows uses different path separators
+ifeq ($(OS_NAME),Windows)
+	sep := ;
+else
+	sep := :
+endif
+
+sqlite := sqlite-$(version)
+
+ifdef JAVA_HOME
+jni_h := $(shell find -L "$(JAVA_HOME)" -name jni.h)
+ifneq ($(jni_h),)
+jni_include := $(shell dirname "$(jni_h)")
+endif
+
+jni_md := $(shell find -L "$(JAVA_HOME)" -name jni_md.h)
+ifneq ($(jni_md),)
+jni_md_include := $(shell dirname "$(jni_md)")
+endif
+endif
+
+# os=Default is meant to be generic unix/linux
+
+known_targets := Linux-Android-arm Linux-Android-aarch64 Linux-Android-x86 Linux-Android-x86_64
+target := $(OS_NAME)-$(OS_ARCH)
+
+ifeq (,$(findstring $(strip $(target)),$(known_targets)))
+  target := Default
+endif
+
+$(info Will build using target: $(target) (detected os: $(OS_NAME), arch: $(OS_ARCH)))
+
+# cross-compilation toolchain prefix (e.g. "arm-linux-gnueabi-")
+CROSS_PREFIX :=
+
+Default_CC        := $(CROSS_PREFIX)gcc
+Default_STRIP     := $(CROSS_PREFIX)strip
+Default_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden
+Default_LINKFLAGS := -shared -static-libgcc -pthread -lm
+Default_LIBNAME   := libsqlitejdbc.so
+Default_SQLITE_FLAGS  := 
+
+Linux-x86_64_CC        := $(CROSS_PREFIX)gcc
+Linux-x86_64_STRIP     := $(CROSS_PREFIX)strip
+Linux-x86_64_CCFLAGS   := -Ilib/inc_linux -I$(JAVA_HOME)/include -Os -g -fstack-protector-all -D_FORTIFY_SOURCE=2 -fPIC -lm -lc -m64 -fvisibility=hidden
+Linux-x86_64_LINKFLAGS := $(Default_LINKFLAGS)
+Linux-x86_64_LIBNAME   := libsqlitejdbc.so
+Linux-x86_64_SQLITE_FLAGS  := 
+
+Linux-Android-arm_CC        := $(CROSS_PREFIX)clang
+Linux-Android-arm_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
+Linux-Android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -g -fstack-protector-all -D_FORTIFY_SOURCE=2 -fPIC -lm -lc -landroid -ldl -llog
+Linux-Android-arm_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-soname,libsqlitejdbc.so
+Linux-Android-arm_LIBNAME   := libsqlitejdbc.so
+Linux-Android-arm_SQLITE_FLAGS  :=
+
+Linux-Android-aarch64_CC        := $(CROSS_PREFIX)clang
+Linux-Android-aarch64_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
+Linux-Android-aarch64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -g -fstack-protector-all -D_FORTIFY_SOURCE=2 -fPIC -lm -lc -landroid -ldl -llog
+Linux-Android-aarch64_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-soname,libsqlitejdbc.so
+Linux-Android-aarch64_LIBNAME   := libsqlitejdbc.so
+Linux-Android-aarch64_SQLITE_FLAGS  :=
+
+Linux-Android-x86_CC        := $(CROSS_PREFIX)clang
+Linux-Android-x86_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
+Linux-Android-x86_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -g -fstack-protector-all -D_FORTIFY_SOURCE=2 -fPIC -lm -lc -landroid -ldl -llog
+Linux-Android-x86_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-soname,libsqlitejdbc.so
+Linux-Android-x86_LIBNAME   := libsqlitejdbc.so
+Linux-Android-x86_SQLITE_FLAGS  :=
+
+Linux-Android-x86_64_CC        := $(CROSS_PREFIX)clang
+Linux-Android-x86_64_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
+Linux-Android-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -g -fstack-protector-all -D_FORTIFY_SOURCE=2 -fPIC -lm -lc -landroid -ldl -llog
+Linux-Android-x86_64_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-soname,libsqlitejdbc.so
+Linux-Android-x86_64_LIBNAME   := libsqlitejdbc.so
+Linux-Android-x86_64_SQLITE_FLAGS  :=
+
+
+CC        := $($(target)_CC)
+STRIP     := $($(target)_STRIP)
+CCFLAGS   := $($(target)_CCFLAGS) 
+LINKFLAGS := $($(target)_LINKFLAGS) 
+LIBNAME   := $($(target)_LIBNAME)
+SQLITE_FLAGS := $($(target)_SQLITE_FLAGS)
+CCFLAGS := $(CCFLAGS) 
+ifneq ($(jni_include),)
+CCFLAGS := $(CCFLAGS) -I"$(jni_include)"
+endif
+ifneq ($(jni_md_include),)
+CCFLAGS := $(CCFLAGS) -I"$(jni_md_include)"
+endif
+
