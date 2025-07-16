@@ -17,11 +17,25 @@ export _HOME_
 basedir1="$_HOME_""/../src/main/resources/org/sqlite/native/Linux-Android/"
 basedir2="$_HOME_""/../example_android/androidjdbc/nativelibs/"
 
+mkdir -p "$basedir1"
+mkdir -p "$basedir2"
+
 cd "$basedir1"
+
+mkdir -p ./aarch64/
+mkdir -p ./arm/
+mkdir -p ./x86/
+mkdir -p ./x86_64/
+
 wget "$base_url""$file_arm64" -O ./aarch64/"$file_jnilib"
 wget "$base_url""$file_arm" -O ./arm/"$file_jnilib"
 wget "$base_url""$file_x86" -O ./x86/"$file_jnilib"
 wget "$base_url""$file_x86_64" -O ./x86_64/"$file_jnilib"
+
+mkdir -p "$basedir2"/arm64-v8a/
+mkdir -p "$basedir2"/armeabi-v7a/
+mkdir -p "$basedir2"/x86/
+mkdir -p "$basedir2"/x86_64/
 
 cp -v "$basedir1"/aarch64/"$file_jnilib" "$basedir2"/arm64-v8a/"$file_jnilib"
 cp -v "$basedir1"/arm/"$file_jnilib" "$basedir2"/armeabi-v7a/"$file_jnilib"
