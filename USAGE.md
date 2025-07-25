@@ -201,3 +201,4 @@ The name of directories in our jar and in Android Studio differ, here is a mappi
 | arm           | armeabi                  |
 | x86           | x86                      |
 | x86_64        | x86_64                   |
+
