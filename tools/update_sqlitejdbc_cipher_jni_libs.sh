@@ -7,6 +7,8 @@ file_arm='linux-android-arm__libsqlitejdbc.so'
 file_x86='linux-android-x86__libsqlitejdbc.so'
 file_x86_64='linux-android-x64__libsqlitejdbc.so'
 
+file_linux_x86_64='linux64__libsqlitejdbc.so'
+
 file_jnilib='libsqlitejdbc.so'
 
 _HOME2_=$(dirname $0)
@@ -16,9 +18,11 @@ export _HOME_
 
 basedir1="$_HOME_""/../src/main/resources/org/sqlite/native/Linux-Android/"
 basedir2="$_HOME_""/../example_android/androidjdbc/nativelibs/"
+basedir3="$_HOME_""/../src/main/resources/org/sqlite/native/Linux/x86_64/"
 
 mkdir -p "$basedir1"
 mkdir -p "$basedir2"
+mkdir -p "$basedir3"
 
 cd "$basedir1"
 
@@ -32,6 +36,13 @@ wget "$base_url""$file_arm" -O ./arm/"$file_jnilib"
 wget "$base_url""$file_x86" -O ./x86/"$file_jnilib"
 wget "$base_url""$file_x86_64" -O ./x86_64/"$file_jnilib"
 
+
+cd "$basedir3"
+wget "$base_url""$file_linux_x86_64" -O ./"$file_jnilib"
+
+
+cd "$basedir1"
+
 mkdir -p "$basedir2"/arm64-v8a/
 mkdir -p "$basedir2"/armeabi-v7a/
 mkdir -p "$basedir2"/x86/
@@ -41,3 +52,4 @@ cp -v "$basedir1"/aarch64/"$file_jnilib" "$basedir2"/arm64-v8a/"$file_jnilib"
 cp -v "$basedir1"/arm/"$file_jnilib" "$basedir2"/armeabi-v7a/"$file_jnilib"
 cp -v "$basedir1"/x86/"$file_jnilib" "$basedir2"/x86/"$file_jnilib"
 cp -v "$basedir1"/x86_64/"$file_jnilib" "$basedir2"/x86_64/"$file_jnilib"
+
