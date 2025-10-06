@@ -46,3 +46,7 @@ mkdir -p org/sqlite/native/Linux/x86_64
 cp -av ../../src/main/resources/org/sqlite/native/Linux/x86_64/libsqlitejdbc.so org/sqlite/native/Linux/x86_64/libsqlitejdbc.so
 
 jar cmvf META-INF/MANIFEST.MF ../sqlite-jdbc-sqlicpher-"$cur_str_version".jar .
+
+cd ../
+ls -al sqlite-jdbc-sqlicpher-"$cur_str_version".jar
+ls -hal sqlite-jdbc-sqlicpher-"$cur_str_version".jar
