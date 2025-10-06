@@ -102,6 +102,11 @@ jobs:
         cd ./example_linux/
         unzip -t sqlite-jdbc-sqlicpher-*.jar
 
+    - name: run test
+      run: |
+        cd ./example_linux/
+        ./do_run.sh
+
     - name: Rename artifact for nightly upload
       run: |
         cp -av ./example_linux/sqlite-jdbc-sqlicpher-*.jar ./

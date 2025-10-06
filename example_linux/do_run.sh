@@ -10,5 +10,8 @@ cd "$basedir"
 pwd
 
 rm -f *.db
-java -classpath ".:sqlite-jdbc-sqlicpher-1.0.12.jar" Sample || exit 1
+javac Sample.java || exit 1
+jar_file=$(find . -name 'sqlite-jdbc-sqlicpher-*.jar' 2>/dev/null)
+echo "found jar: ""$jar_file"
+java -classpath ".:$jar_file" Sample || exit 1
 
