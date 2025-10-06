@@ -45,8 +45,8 @@ echo 'org.sqlite.JDBC' > META-INF/services/java.sql.Driver
 mkdir -p org/sqlite/native/Linux/x86_64
 cp -av ../../src/main/resources/org/sqlite/native/Linux/x86_64/libsqlitejdbc.so org/sqlite/native/Linux/x86_64/libsqlitejdbc.so
 
-jar cmvf META-INF/MANIFEST.MF ../sqlite-jdbc-sqlicpher-"$cur_str_version".jar .
+jar cmvf META-INF/MANIFEST.MF ../sqlite-jdbc-sqlcipher-"$cur_str_version".jar .
 
 cd ../
-ls -al sqlite-jdbc-sqlicpher-"$cur_str_version".jar
-ls -hal sqlite-jdbc-sqlicpher-"$cur_str_version".jar
+ls -al sqlite-jdbc-sqlcipher-"$cur_str_version".jar
+ls -hal sqlite-jdbc-sqlcipher-"$cur_str_version".jar

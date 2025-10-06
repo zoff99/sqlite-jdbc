@@ -95,12 +95,12 @@ jobs:
       run: |
         cd ./example_linux/
         ./do_compile.sh
-        ls -hal sqlite-jdbc-sqlicpher-*.jar
+        ls -hal sqlite-jdbc-sqlcipher-*.jar
 
     - name: jar artifact contents
       run: |
         cd ./example_linux/
-        unzip -t sqlite-jdbc-sqlicpher-*.jar
+        unzip -t sqlite-jdbc-sqlcipher-*.jar
 
     - name: run test
       run: |
@@ -109,7 +109,7 @@ jobs:
 
     - name: Rename artifact for nightly upload
       run: |
-        cp -av ./example_linux/sqlite-jdbc-sqlicpher-*.jar ./
+        cp -av ./example_linux/sqlite-jdbc-sqlcipher-*.jar ./
 
     - name: Upload to nightly release
       uses: ncipollo/release-action@v1
@@ -122,7 +122,7 @@ jobs:
         prerelease: true
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "sqlite-jdbc-sqlicpher-*.jar"
+        artifacts: "sqlite-jdbc-sqlcipher-*.jar"
 
     - name: GitHub info
       run: |
@@ -137,4 +137,4 @@ jobs:
         allowUpdates: true
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "sqlite-jdbc-sqlicpher-*.jar"
+        artifacts: "sqlite-jdbc-sqlcipher-*.jar"
