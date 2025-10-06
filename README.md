@@ -41,6 +41,19 @@ https://github.com/zoff99/iocipher_pack/tree/master/002_src_libsqlfs/openssl_inc
 see: https://github.com/zoff99/sqlite-jdbc/tree/android_test/example_android
 <br>
 
+
+### Linux Desktop Example Project
+see: https://github.com/zoff99/sqlite-jdbc/tree/android_test/example_linux
+
+download `sqlite-jdbc-sqlcipher-*.jar` from the github [releases](https://github.com/zoff99/sqlite-jdbc/releases) in this repository<br>
+and put it into the `example_linux directory` then run:
+```bash
+javac Sample.java
+jar_file=$(find . -name 'sqlite-jdbc-sqlcipher-*.jar' 2>/dev/null)
+java -classpath ".:$jar_file" Sample
+```
+<br>
+
 <br>
 Any use of this project's code by GitHub Copilot, past or present, is done
 without our permission.  We do not consent to GitHub's use of this project's
