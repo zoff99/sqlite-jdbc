@@ -1,4 +1,6 @@
 Sample.class
 sample.db
 _jar/
+.m2/
 sqlite-jdbc-sqlcipher-*jar
+local_maven_sqlitejdbc_*.zip

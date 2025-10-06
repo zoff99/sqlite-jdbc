@@ -110,6 +110,7 @@ jobs:
     - name: Rename artifact for nightly upload
       run: |
         cp -av ./example_linux/sqlite-jdbc-sqlcipher-*.jar ./
+        cp -av ./example_linux/local_maven_sqlitejdbc_*.zip ./
 
     - name: Upload to nightly release
       uses: ncipollo/release-action@v1
@@ -122,7 +123,7 @@ jobs:
         prerelease: true
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "sqlite-jdbc-sqlcipher-*.jar"
+        artifacts: "sqlite-jdbc-sqlcipher-*.jar,local_maven_sqlitejdbc_*.zip"
 
     - name: GitHub info
       run: |
@@ -137,4 +138,4 @@ jobs:
         allowUpdates: true
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "sqlite-jdbc-sqlcipher-*.jar"
+        artifacts: "sqlite-jdbc-sqlcipher-*.jar,local_maven_sqlitejdbc_*.zip"
