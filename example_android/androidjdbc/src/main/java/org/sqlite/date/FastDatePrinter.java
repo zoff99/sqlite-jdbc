@@ -87,7 +87,7 @@ public class FastDatePrinter implements DatePrinter, Serializable {
     /**
      * Required for serialization support.
      *
-     * @see Serializable
+     * @see java.io.Serializable
      */
     private static final long serialVersionUID = 1L;
 

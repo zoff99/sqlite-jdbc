@@ -195,7 +195,7 @@ public abstract class CoreStatement implements Codes {
      * provide multiple values when inserting multiple rows. Suggestion is to use a <a
      * href=https://www.sqlite.org/lang_returning.html>RETURNING</a> clause instead.
      *
-     * @see Statement#getGeneratedKeys()
+     * @see java.sql.Statement#getGeneratedKeys()
      */
     public ResultSet getGeneratedKeys() throws SQLException {
         // getGeneratedKeys is required to return an EmptyResult set if the statement

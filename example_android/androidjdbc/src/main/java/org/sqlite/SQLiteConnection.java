@@ -171,7 +171,7 @@ public abstract class SQLiteConnection implements Connection {
     /**
      * Sets the mode that will be used to start transactions on this connection.
      *
-     * @param mode One of {@link TransactionMode}
+     * @param mode One of {@link SQLiteConfig.TransactionMode}
      * @see <a
      *     href="https://www.sqlite.org/lang_transaction.html">https://www.sqlite.org/lang_transaction.html</a>
      */
@@ -179,13 +179,13 @@ public abstract class SQLiteConnection implements Connection {
         connectionConfig.setTransactionMode(mode);
     }
 
-    /** @see Connection#getTransactionIsolation() */
+    /** @see java.sql.Connection#getTransactionIsolation() */
     @Override
     public int getTransactionIsolation() {
         return connectionConfig.getTransactionIsolation();
     }
 
-    /** @see Connection#setTransactionIsolation(int) */
+    /** @see java.sql.Connection#setTransactionIsolation(int) */
     public void setTransactionIsolation(int level) throws SQLException {
         checkOpen();
 
@@ -345,7 +345,7 @@ public abstract class SQLiteConnection implements Connection {
         return db;
     }
 
-    /** @see Connection#getAutoCommit() */
+    /** @see java.sql.Connection#getAutoCommit() */
     @Override
     public boolean getAutoCommit() throws SQLException {
         checkOpen();
@@ -353,7 +353,7 @@ public abstract class SQLiteConnection implements Connection {
         return connectionConfig.isAutoCommit();
     }
 
-    /** @see Connection#setAutoCommit(boolean) */
+    /** @see java.sql.Connection#setAutoCommit(boolean) */
     @Override
     public void setAutoCommit(boolean ac) throws SQLException {
         checkOpen();
@@ -411,7 +411,7 @@ public abstract class SQLiteConnection implements Connection {
         return db.isClosed();
     }
 
-    /** @see Connection#close() */
+    /** @see java.sql.Connection#close() */
     @Override
     public void close() throws SQLException {
         if (isClosed()) return;
@@ -441,7 +441,7 @@ public abstract class SQLiteConnection implements Connection {
         return db.libversion();
     }
 
-    /** @see Connection#commit() */
+    /** @see java.sql.Connection#commit() */
     @Override
     public void commit() throws SQLException {
         checkOpen();
@@ -452,7 +452,7 @@ public abstract class SQLiteConnection implements Connection {
         this.setCurrentTransactionMode(this.getConnectionConfig().getTransactionMode());
     }
 
-    /** @see Connection#rollback() */
+    /** @see java.sql.Connection#rollback() */
     @Override
     public void rollback() throws SQLException {
         checkOpen();

@@ -56,7 +56,7 @@ abstract class FormatCache<F extends Format> {
     /**
      * Gets a formatter instance using the specified pattern, time zone and locale.
      *
-     * @param pattern {@link SimpleDateFormat} compatible pattern, non-null
+     * @param pattern {@link java.text.SimpleDateFormat} compatible pattern, non-null
      * @param timeZone the time zone, null means use the default TimeZone
      * @param locale the locale, null means use the default Locale
      * @return a pattern based date/time formatter
@@ -89,7 +89,7 @@ abstract class FormatCache<F extends Format> {
     /**
      * Create a format instance using the specified pattern, time zone and locale.
      *
-     * @param pattern {@link SimpleDateFormat} compatible pattern, this will not be null.
+     * @param pattern {@link java.text.SimpleDateFormat} compatible pattern, this will not be null.
      * @param timeZone time zone, this will not be null.
      * @param locale locale, this will not be null.
      * @return a pattern based date/time formatter

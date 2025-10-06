@@ -41,8 +41,8 @@ public class SQLiteConnectionPoolDataSource extends SQLiteDataSource
     }
 
     /**
-     * @see javax.sql.ConnectionPoolDataSource#getPooledConnection(String,
-     *     String)
+     * @see javax.sql.ConnectionPoolDataSource#getPooledConnection(java.lang.String,
+     *     java.lang.String)
      */
     public PooledConnection getPooledConnection(String user, String password) throws SQLException {
         return new SQLitePooledConnection(getConnection(user, password));

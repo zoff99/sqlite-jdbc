@@ -153,7 +153,7 @@ public class SQLitePooledConnection extends JDBC4PooledConnection {
     }
 
     /**
-     * @see javax.sql.PooledConnection#addConnectionEventListener(ConnectionEventListener)
+     * @see javax.sql.PooledConnection#addConnectionEventListener(javax.sql.ConnectionEventListener)
      */
     public void addConnectionEventListener(ConnectionEventListener listener) {
         listeners.add(listener);
@@ -161,7 +161,7 @@ public class SQLitePooledConnection extends JDBC4PooledConnection {
 
     /**
      * @see
-     *     javax.sql.PooledConnection#removeConnectionEventListener(ConnectionEventListener)
+     *     javax.sql.PooledConnection#removeConnectionEventListener(javax.sql.ConnectionEventListener)
      */
     public void removeConnectionEventListener(ConnectionEventListener listener) {
         listeners.remove(listener);

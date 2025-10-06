@@ -156,25 +156,25 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         return (ParameterMetaData) this;
     }
 
-    /** @see ParameterMetaData#getParameterCount() */
+    /** @see java.sql.ParameterMetaData#getParameterCount() */
     public int getParameterCount() throws SQLException {
         checkOpen();
         return paramCount;
     }
 
-    /** @see ParameterMetaData#getParameterClassName(int) */
+    /** @see java.sql.ParameterMetaData#getParameterClassName(int) */
     public String getParameterClassName(int param) throws SQLException {
         checkOpen();
         return "java.lang.String";
     }
 
-    /** @see ParameterMetaData#getParameterTypeName(int) */
+    /** @see java.sql.ParameterMetaData#getParameterTypeName(int) */
     public String getParameterTypeName(int pos) throws SQLException {
         checkIndex(pos);
         return JDBCType.valueOf(getParameterType(pos)).getName();
     }
 
-    /** @see ParameterMetaData#getParameterType(int) */
+    /** @see java.sql.ParameterMetaData#getParameterType(int) */
     public int getParameterType(int pos) throws SQLException {
         checkIndex(pos);
         Object paramValue = batch[pos - 1];
@@ -194,27 +194,27 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
     }
 
-    /** @see ParameterMetaData#getParameterMode(int) */
+    /** @see java.sql.ParameterMetaData#getParameterMode(int) */
     public int getParameterMode(int pos) {
         return ParameterMetaData.parameterModeIn;
     }
 
-    /** @see ParameterMetaData#getPrecision(int) */
+    /** @see java.sql.ParameterMetaData#getPrecision(int) */
     public int getPrecision(int pos) {
         return 0;
     }
 
-    /** @see ParameterMetaData#getScale(int) */
+    /** @see java.sql.ParameterMetaData#getScale(int) */
     public int getScale(int pos) {
         return 0;
     }
 
-    /** @see ParameterMetaData#isNullable(int) */
+    /** @see java.sql.ParameterMetaData#isNullable(int) */
     public int isNullable(int pos) {
         return ParameterMetaData.parameterNullable;
     }
 
-    /** @see ParameterMetaData#isSigned(int) */
+    /** @see java.sql.ParameterMetaData#isSigned(int) */
     public boolean isSigned(int pos) {
         return true;
     }
@@ -224,7 +224,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         return this;
     }
 
-    /** @see java.sql.PreparedStatement#setBigDecimal(int, BigDecimal) */
+    /** @see java.sql.PreparedStatement#setBigDecimal(int, java.math.BigDecimal) */
     public void setBigDecimal(int pos, BigDecimal value) throws SQLException {
         batch(pos, value == null ? null : value.toString());
     }
@@ -265,7 +265,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
     }
 
-    /** @see java.sql.PreparedStatement#setBinaryStream(int, InputStream, int) */
+    /** @see java.sql.PreparedStatement#setBinaryStream(int, java.io.InputStream, int) */
     public void setBinaryStream(int pos, InputStream istream, int length) throws SQLException {
         if (istream == null && length == 0) {
             setBytes(pos, null);
@@ -274,12 +274,12 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         setBytes(pos, readBytes(istream, length));
     }
 
-    /** @see java.sql.PreparedStatement#setAsciiStream(int, InputStream, int) */
+    /** @see java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream, int) */
     public void setAsciiStream(int pos, InputStream istream, int length) throws SQLException {
         setUnicodeStream(pos, istream, length);
     }
 
-    /** @see java.sql.PreparedStatement#setUnicodeStream(int, InputStream, int) */
+    /** @see java.sql.PreparedStatement#setUnicodeStream(int, java.io.InputStream, int) */
     public void setUnicodeStream(int pos, InputStream istream, int length) throws SQLException {
         if (istream == null && length == 0) {
             setString(pos, null);
@@ -335,12 +335,12 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         setNull(pos, u1, null);
     }
 
-    /** @see java.sql.PreparedStatement#setNull(int, int, String) */
+    /** @see java.sql.PreparedStatement#setNull(int, int, java.lang.String) */
     public void setNull(int pos, int u1, String u2) throws SQLException {
         batch(pos, null);
     }
 
-    /** @see java.sql.PreparedStatement#setObject(int, Object) */
+    /** @see java.sql.PreparedStatement#setObject(int, java.lang.Object) */
     public void setObject(int pos, Object value) throws SQLException {
         if (value == null) {
             batch(pos, null);
@@ -367,12 +367,12 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
     }
 
-    /** @see java.sql.PreparedStatement#setObject(int, Object, int) */
+    /** @see java.sql.PreparedStatement#setObject(int, java.lang.Object, int) */
     public void setObject(int p, Object v, int t) throws SQLException {
         setObject(p, v);
     }
 
-    /** @see java.sql.PreparedStatement#setObject(int, Object, int, int) */
+    /** @see java.sql.PreparedStatement#setObject(int, java.lang.Object, int, int) */
     public void setObject(int p, Object v, int t, int s) throws SQLException {
         setObject(p, v);
     }
@@ -382,21 +382,22 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         setInt(pos, value);
     }
 
-    /** @see java.sql.PreparedStatement#setString(int, String) */
+    /** @see java.sql.PreparedStatement#setString(int, java.lang.String) */
     public void setString(int pos, String value) throws SQLException {
         batch(pos, value);
     }
 
-    /** @see java.sql.PreparedStatement#setCharacterStream(int, Reader, int) */
+    /** @see java.sql.PreparedStatement#setCharacterStream(int, java.io.Reader, int) */
     public void setCharacterStream(int pos, Reader reader, int length) throws SQLException {
         try {
-            // copy chars from reader to StringBuffer
-            StringBuffer sb = new StringBuffer();
+            // copy chars from reader to StringBuilder
+            StringBuilder sb = new StringBuilder();
             char[] cbuf = new char[8192];
             int cnt;
 
-            while ((cnt = reader.read(cbuf)) > 0) {
+            while ((cnt = reader.read(cbuf, 0, Math.min(length, cbuf.length))) > 0) {
                 sb.append(cbuf, 0, cnt);
+                length -= cnt;
             }
 
             // set as string
@@ -407,12 +408,12 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
     }
 
-    /** @see java.sql.PreparedStatement#setDate(int, Date) */
+    /** @see java.sql.PreparedStatement#setDate(int, java.sql.Date) */
     public void setDate(int pos, Date x) throws SQLException {
         setDate(pos, x, Calendar.getInstance());
     }
 
-    /** @see java.sql.PreparedStatement#setDate(int, Date, Calendar) */
+    /** @see java.sql.PreparedStatement#setDate(int, java.sql.Date, java.util.Calendar) */
     public void setDate(int pos, Date x, Calendar cal) throws SQLException {
         if (x == null) {
             setObject(pos, null);
@@ -421,12 +422,12 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
     }
 
-    /** @see java.sql.PreparedStatement#setTime(int, Time) */
+    /** @see java.sql.PreparedStatement#setTime(int, java.sql.Time) */
     public void setTime(int pos, Time x) throws SQLException {
         setTime(pos, x, Calendar.getInstance());
     }
 
-    /** @see java.sql.PreparedStatement#setTime(int, Time, Calendar) */
+    /** @see java.sql.PreparedStatement#setTime(int, java.sql.Time, java.util.Calendar) */
     public void setTime(int pos, Time x, Calendar cal) throws SQLException {
         if (x == null) {
             setObject(pos, null);
@@ -435,12 +436,12 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
     }
 
-    /** @see java.sql.PreparedStatement#setTimestamp(int, Timestamp) */
+    /** @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp) */
     public void setTimestamp(int pos, Timestamp x) throws SQLException {
         setTimestamp(pos, x, Calendar.getInstance());
     }
 
-    /** @see java.sql.PreparedStatement#setTimestamp(int, Timestamp, Calendar) */
+    /** @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp, java.util.Calendar) */
     public void setTimestamp(int pos, Timestamp x, Calendar cal) throws SQLException {
         if (x == null) {
             setObject(pos, null);
@@ -485,7 +486,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         throw unsupported();
     }
 
-    /** @see org.sqlite.core.CoreStatement#exec(String) */
+    /** @see org.sqlite.core.CoreStatement#exec(java.lang.String) */
     @Override
     public boolean execute(String sql) throws SQLException {
         throw invalid();
@@ -503,7 +504,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         throw invalid();
     }
 
-    /** @see org.sqlite.core.CoreStatement#exec(String) */
+    /** @see org.sqlite.core.CoreStatement#exec(java.lang.String) */
     @Override
     public int executeUpdate(String sql) throws SQLException {
         throw invalid();

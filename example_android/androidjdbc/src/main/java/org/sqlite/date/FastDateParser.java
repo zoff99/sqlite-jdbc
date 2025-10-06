@@ -69,7 +69,7 @@ public class FastDateParser implements DateParser, Serializable {
     /**
      * Required for serialization support.
      *
-     * @see Serializable
+     * @see java.io.Serializable
      */
     private static final long serialVersionUID = 2L;
 
@@ -143,7 +143,7 @@ public class FastDateParser implements DateParser, Serializable {
      * Initialize derived fields from defining fields. This is called from constructor and from
      * readObject (de-serialization)
      *
-     * @param definingCalendar the {@link Calendar} instance used to initialize this
+     * @param definingCalendar the {@link java.util.Calendar} instance used to initialize this
      *     FastDateParser
      */
     private void init(final Calendar definingCalendar) {

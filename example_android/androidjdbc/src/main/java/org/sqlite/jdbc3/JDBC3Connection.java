@@ -85,7 +85,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
         return null;
     }
 
-    /** @see java.sql.Connection#setCatalog(String) */
+    /** @see java.sql.Connection#setCatalog(java.lang.String) */
     public void setCatalog(String catalog) throws SQLException {
         checkOpen();
     }
@@ -115,7 +115,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
         }
     }
 
-    /** @see java.sql.Connection#setTypeMap(Map) */
+    /** @see java.sql.Connection#setTypeMap(java.util.Map) */
     public void setTypeMap(Map map) throws SQLException {
         synchronized (this) {
             this.typeMap = map;
@@ -151,7 +151,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
         this.readOnly = ro;
     }
 
-    /** @see java.sql.Connection#nativeSQL(String) */
+    /** @see java.sql.Connection#nativeSQL(java.lang.String) */
     public String nativeSQL(String sql) {
         return sql;
     }
@@ -180,7 +180,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
     /** @see java.sql.Connection#createStatement(int, int, int) */
     public abstract Statement createStatement(int rst, int rsc, int rsh) throws SQLException;
 
-    /** @see java.sql.Connection#prepareCall(String) */
+    /** @see java.sql.Connection#prepareCall(java.lang.String) */
     public CallableStatement prepareCall(String sql) throws SQLException {
         return prepareCall(
                 sql,
@@ -189,43 +189,43 @@ public abstract class JDBC3Connection extends SQLiteConnection {
                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
     }
 
-    /** @see java.sql.Connection#prepareCall(String, int, int) */
+    /** @see java.sql.Connection#prepareCall(java.lang.String, int, int) */
     public CallableStatement prepareCall(String sql, int rst, int rsc) throws SQLException {
         return prepareCall(sql, rst, rsc, ResultSet.CLOSE_CURSORS_AT_COMMIT);
     }
 
-    /** @see java.sql.Connection#prepareCall(String, int, int, int) */
+    /** @see java.sql.Connection#prepareCall(java.lang.String, int, int, int) */
     public CallableStatement prepareCall(String sql, int rst, int rsc, int rsh)
             throws SQLException {
         throw new SQLException("SQLite does not support Stored Procedures");
     }
 
-    /** @see java.sql.Connection#prepareStatement(String) */
+    /** @see java.sql.Connection#prepareStatement(java.lang.String) */
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         return prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     }
 
-    /** @see java.sql.Connection#prepareStatement(String, int) */
+    /** @see java.sql.Connection#prepareStatement(java.lang.String, int) */
     public PreparedStatement prepareStatement(String sql, int autoC) throws SQLException {
         return prepareStatement(sql);
     }
 
-    /** @see java.sql.Connection#prepareStatement(String, int[]) */
+    /** @see java.sql.Connection#prepareStatement(java.lang.String, int[]) */
     public PreparedStatement prepareStatement(String sql, int[] colInds) throws SQLException {
         return prepareStatement(sql);
     }
 
-    /** @see java.sql.Connection#prepareStatement(String, String[]) */
+    /** @see java.sql.Connection#prepareStatement(java.lang.String, java.lang.String[]) */
     public PreparedStatement prepareStatement(String sql, String[] colNames) throws SQLException {
         return prepareStatement(sql);
     }
 
-    /** @see java.sql.Connection#prepareStatement(String, int, int) */
+    /** @see java.sql.Connection#prepareStatement(java.lang.String, int, int) */
     public PreparedStatement prepareStatement(String sql, int rst, int rsc) throws SQLException {
         return prepareStatement(sql, rst, rsc, ResultSet.CLOSE_CURSORS_AT_COMMIT);
     }
 
-    /** @see java.sql.Connection#prepareStatement(String, int, int, int) */
+    /** @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int) */
     public abstract PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh)
             throws SQLException;
 
@@ -244,7 +244,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
         return sp;
     }
 
-    /** @see java.sql.Connection#setSavepoint(String) */
+    /** @see java.sql.Connection#setSavepoint(java.lang.String) */
     public Savepoint setSavepoint(String name) throws SQLException {
         checkOpen();
         if (getAutoCommit()) {
@@ -259,7 +259,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
         return sp;
     }
 
-    /** @see java.sql.Connection#releaseSavepoint(Savepoint) */
+    /** @see java.sql.Connection#releaseSavepoint(java.sql.Savepoint) */
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
         checkOpen();
         if (getAutoCommit()) {
@@ -269,7 +269,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
                 .exec(String.format("RELEASE SAVEPOINT %s", savepoint.getSavepointName()), false);
     }
 
-    /** @see java.sql.Connection#rollback(Savepoint) */
+    /** @see java.sql.Connection#rollback(java.sql.Savepoint) */
     public void rollback(Savepoint savepoint) throws SQLException {
         checkOpen();
         if (getAutoCommit()) {

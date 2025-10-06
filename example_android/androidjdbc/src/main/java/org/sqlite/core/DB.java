@@ -160,7 +160,7 @@ public abstract class DB implements Codes {
      * @throws SQLException
      * @see <a
      *     href="https://www.sqlite.org/c3ref/enable_shared_cache.html">https://www.sqlite.org/c3ref/enable_shared_cache.html</a>
-     * @see SQLiteErrorCode
+     * @see org.sqlite.SQLiteErrorCode
      */
     public abstract int shared_cache(boolean enable) throws SQLException;
 

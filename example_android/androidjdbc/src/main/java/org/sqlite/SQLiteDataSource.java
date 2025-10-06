@@ -460,12 +460,12 @@ public class SQLiteDataSource implements DataSource {
 
     // codes for the DataSource interface
 
-    /** @see DataSource#getConnection() */
+    /** @see javax.sql.DataSource#getConnection() */
     public Connection getConnection() throws SQLException {
         return getConnection(null, null);
     }
 
-    /** @see DataSource#getConnection(String, String) */
+    /** @see javax.sql.DataSource#getConnection(java.lang.String, java.lang.String) */
     public SQLiteConnection getConnection(String username, String password) throws SQLException {
         Properties p = config.toProperties();
         if (username != null) p.put("user", username);
@@ -473,12 +473,12 @@ public class SQLiteDataSource implements DataSource {
         return JDBC.createConnection(url, p);
     }
 
-    /** @see DataSource#getLogWriter() */
+    /** @see javax.sql.DataSource#getLogWriter() */
     public PrintWriter getLogWriter() throws SQLException {
         return logger;
     }
 
-    /** @see DataSource#getLoginTimeout() */
+    /** @see javax.sql.DataSource#getLoginTimeout() */
     public int getLoginTimeout() throws SQLException {
         return loginTimeout;
     }
@@ -487,12 +487,12 @@ public class SQLiteDataSource implements DataSource {
         throw new SQLFeatureNotSupportedException("getParentLogger");
     }
 
-    /** @see DataSource#setLogWriter(PrintWriter) */
+    /** @see javax.sql.DataSource#setLogWriter(java.io.PrintWriter) */
     public void setLogWriter(PrintWriter out) throws SQLException {
         this.logger = out;
     }
 
-    /** @see DataSource#setLoginTimeout(int) */
+    /** @see javax.sql.DataSource#setLoginTimeout(int) */
     public void setLoginTimeout(int seconds) throws SQLException {
         loginTimeout = seconds;
     }

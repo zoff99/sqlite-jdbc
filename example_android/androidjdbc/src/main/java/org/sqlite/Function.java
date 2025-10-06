@@ -306,7 +306,7 @@ public abstract class Function {
      * @see Function
      */
     public abstract static class Aggregate extends Function implements Cloneable {
-        /** @see Function#xFunc() */
+        /** @see org.sqlite.Function#xFunc() */
         protected final void xFunc() {}
 
         /**
@@ -327,7 +327,7 @@ public abstract class Function {
          */
         protected abstract void xFinal() throws SQLException;
 
-        /** @see Object#clone() */
+        /** @see java.lang.Object#clone() */
         public Object clone() throws CloneNotSupportedException {
             return super.clone();
         }

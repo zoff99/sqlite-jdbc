@@ -196,7 +196,7 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
                     ".*\\sCONSTRAINT\\s+(.*?)\\s+PRIMARY\\s+KEY\\s+\\((.*?)\\).*",
                     Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    /** @see Object#finalize() */
+    /** @see java.lang.Object#finalize() */
     protected void finalize() throws Throwable {
         close();
     }
