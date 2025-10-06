@@ -33,6 +33,18 @@
             System.out.println("name = " + rs.getString("name"));
             System.out.println("id = " + rs.getInt("id"));
           }
+
+          try
+          {
+              System.out.println("closing connection ...");
+              connection.close();
+              System.out.println("done");
+          }
+          catch (Exception e2)
+          {
+              System.out.println("ERR:SHUTDOWN:" + e2.getMessage());
+              e2.printStackTrace();
+          }
         }
         catch(SQLException e)
         {
