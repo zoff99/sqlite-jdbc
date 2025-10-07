@@ -1,0 +1,29 @@
+
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
+dependencies {
+    testImplementation libs.junit
+    implementation libs.guava
+
+    implementation 'com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.13'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+application {
+    // Define the main class for the application.
+    mainClass = 'org.example.App'
+}
