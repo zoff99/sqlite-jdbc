@@ -11,7 +11,7 @@ pwd
 
 rm -f *.db
 javac Sample.java || exit 1
-jar_file=$(find . -name 'sqlite-jdbc-sqlcipher-*.jar' 2>/dev/null)
+jar_file=$(find . -name 'sqlite-jdbc-sqlcipher-*.jar' 2>/dev/null|grep -v '.m2' 2>/dev/null)
 echo "found jar: ""$jar_file"
 java -classpath ".:$jar_file" Sample || exit 1
 
