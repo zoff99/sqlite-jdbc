@@ -2,7 +2,7 @@ package com.zoffcc.applications.androidjdbc;
 
 public final class BuildConfig {
 
-    public static final int VERSION_CODE = 10013;
-    public static final String VERSION_NAME = "1.0.13";
+    public static final int VERSION_CODE = 10014;
+    public static final String VERSION_NAME = "1.0.14";
 
 }
