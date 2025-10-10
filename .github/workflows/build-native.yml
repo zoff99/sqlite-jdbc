@@ -5,12 +5,10 @@ on:
     paths-ignore:
      - 'README.md'
      - '.github/workflows/android_app.yml'
-     - 'example_android/**'
   pull_request:
     paths-ignore:
      - 'README.md'
      - '.github/workflows/android_app.yml'
-     - 'example_android/**'
   workflow_dispatch:
 
 jobs:
