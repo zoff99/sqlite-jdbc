@@ -52,6 +52,7 @@
           {
               System.out.println("ERR:SHUTDOWN:" + e2.getMessage());
               e2.printStackTrace();
+              System.exit(-1);
           }
         }
         catch(SQLException e)
@@ -59,6 +60,7 @@
           // if the error message is "out of memory",
           // it probably means no database file is found
           e.printStackTrace(System.err);
+          System.exit(-2);
         }
       }
     }
