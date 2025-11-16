@@ -72,9 +72,9 @@ jobs:
         run: |
           ls -al /tmp/ || echo "NO ERR"
           ls -alR src/main/resources/org/sqlite/native/ || echo "NO ERR"
-          ls -al src/main/resources/org/sqlite/native/*/*/libsqlitejdbc.so
-          cp -v src/main/resources/org/sqlite/native/*/*/libsqlitejdbc.so ${{ matrix.target }}__libsqlitejdbc.so
-          ls -rattl *libsqlitejdbc.so
+          ls -al src/main/resources/org/sqlite/native/*/*/*sqlitejdbc*
+          cp -v src/main/resources/org/sqlite/native/*/*/*sqlitejdbc* ${{ matrix.target }}__libsqlitejdbc.so
+          ls -rattl *sqlitejdbc*
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
