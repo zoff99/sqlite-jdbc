@@ -9,6 +9,9 @@ file_x86_64='linux-android-x64__libsqlitejdbc.so'
 
 file_linux_x86_64='linux64__libsqlitejdbc.so'
 
+url_win_x86_64_libcrypto='https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/002_src_libsqlfs/openssl_win64_libs/libcrypto.a'
+url_win_x86_64_libssl='https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/002_src_libsqlfs/openssl_win64_libs/libssl.a'
+
 file_jnilib='libsqlitejdbc.so'
 
 _HOME2_=$(dirname $0)
@@ -53,3 +56,5 @@ cp -v "$basedir1"/arm/"$file_jnilib" "$basedir2"/armeabi-v7a/"$file_jnilib"
 cp -v "$basedir1"/x86/"$file_jnilib" "$basedir2"/x86/"$file_jnilib"
 cp -v "$basedir1"/x86_64/"$file_jnilib" "$basedir2"/x86_64/"$file_jnilib"
 
+wget "$url_win_x86_64_libcrypto" -O "$_HOME_"/../openssl_libs/Windows-x86_64/libcrypto.a
+wget "$url_win_x86_64_libssl" -O  "$_HOME_"/../openssl_libs/Windows-x86_64/libssl.a
