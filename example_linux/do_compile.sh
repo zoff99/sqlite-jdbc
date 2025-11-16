@@ -45,11 +45,17 @@ Built-By: Zoff' > META-INF/MANIFEST.MF || exit 1
 mkdir -p META-INF/services/
 echo 'org.sqlite.JDBC' > META-INF/services/java.sql.Driver || exit 1
 
+
+
 mkdir -p org/sqlite/native/Linux/x86_64
 cp -av ../../src/main/resources/org/sqlite/native/Linux/x86_64/libsqlitejdbc.so org/sqlite/native/Linux/x86_64/libsqlitejdbc.so || exit 1
 
 mkdir -p org/sqlite/native/Linux/aarch64
 cp -av ../../src/main/resources/org/sqlite/native/Linux/aarch64/libsqlitejdbc.so org/sqlite/native/Linux/aarch64/libsqlitejdbc.so || exit 1
+
+mkdir -p org/sqlite/native/Windows/x86_64
+cp -av ../../src/main/resources/org/sqlite/native/Windows/x86_64/sqlitejdbc.dll org/sqlite/native/Windows/x86_64/sqlitejdbc.dll || exit 1
+
 
 
 jar cmvf META-INF/MANIFEST.MF ../sqlite-jdbc-sqlcipher-"$cur_str_version".jar . || exit 1
