@@ -10,6 +10,4 @@ cd "$_HOME_" || exit
 docker build -f Dockerfile -t sqlite-jdbc_windows-static-x64-posix .
 pwd
 ls -al
-docker run --rm sqlite-jdbc_windows-static-x64-posix > ./dockcross-windows-static-x64-posix
-chmod +x ./dockcross-windows-static-x64-posix
 cd ../../

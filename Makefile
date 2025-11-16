@@ -29,6 +29,9 @@ ifeq ($(findstring mingw, $(ccmachine)), mingw)
 	CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS) -lwsock32 -Wl,-kill-at
 	# -Wl,-z,max-page-size=16384
 	CCFLAGS += -l:libiphlpapi.a -Wl,-Bstatic -lcrypt32 -Wl,-Bstatic -lws2_32
+	LINKFLAGS:= -lwsock32 -l:libiphlpapi.a -Wl,-Bstatic -lcrypt32 -Wl,-Bstatic -lws2_32 $(LINKFLAGS)
+	CC="x86_64-w64-mingw32-gcc"
+	AR="x86_64-w64-mingw32-ar"
 else
 	CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS) -Wl,-z,max-page-size=16384
 endif
@@ -113,9 +116,9 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux64 linux-arm64
+native-all: linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux64 linux-arm64 win64
 			# mac64 mac-arm64
-			# win64 win-arm64
+			# win-arm64
 
 native: $(NATIVE_DLL)
 
@@ -174,8 +177,7 @@ mac-arm64: $(SQLITE_UNPACKED) jni-header
 win64: $(SQLITE_UNPACKED) jni-header
 	./custom_docker/windows-x64/do.sh
 	pwd
-	./custom_docker/windows-x64/dockcross-windows-static-x64-posix -i sqlite-jdbc_windows-static-x64-posix \
-	 -a $(DOCKER_RUN_OPTS) bash -c 'pwd; env|grep CC ; make clean-native native CROSS_PREFIX=x86_64-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86_64'
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work -i sqlite-jdbc_windows-static-x64-posix bash -c 'pwd; env|grep CC ; make clean-native native CROSS_PREFIX=x86_64-w64-mingw32- OS_NAME=Windows OS_ARCH=x86_64'
 
 win-arm64: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-windows-arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=aarch64-w64-mingw32- OS_NAME=Windows OS_ARCH=aarch64'

@@ -36,7 +36,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-Android-arm Linux-Android-aarch64 Linux-Android-x86 Linux-Android-x86_64
+known_targets := Linux-Android-arm Linux-Android-aarch64 Linux-Android-x86 Linux-Android-x86_64 Windows-x86_64
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))

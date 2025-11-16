@@ -1,12 +1,14 @@
-FROM dockcross/windows-static-x64:latest
+FROM ubuntu:22.04
 ARG DEBIAN_FRONTEND=noninteractive
 RUN export DEBIAN_FRONTEND=noninteractive && apt update && apt install -y make yasm wget git \
     coreutils autoconf libtool pkg-config nano
-RUN mkdir -p /src/
-RUN wget https://github.com/openssl/openssl/releases/download/openssl-3.6.0/openssl-3.6.0.tar.gz -O /src/openssl.tar.gz
-#RUN cd /src/ && tar -xzvf openssl.tar.gz && cd openssl-* && \
-#    ./Configure no-apps no-docs no-dso no-dgram linux-aarch64 --prefix=/opt/openssl --openssldir=/usr/local/ssl && \
-#    ln -s / aarch64-unknown-linux-gnu- && \
-#    make -j $(nproc)
-#RUN cd /src/ && cd openssl-* && make install
+RUN DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          wine libwine-dev libwine wine64 wine64-tools \
+          make wget git coreutils autoconf \
+          libtool pkg-config gcc-mingw-w64-x86-64 \
+          gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 binutils-mingw-w64-x86-64 \
+          mingw-w64-tools pkg-config-mingw-w64-x86-64 \
+          mingw-w64-x86-64-dev
+
 WORKDIR /work
