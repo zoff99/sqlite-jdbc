@@ -103,8 +103,7 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 \
-			linux64 linux-arm64 \
+native-all: linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux64 linux-arm64
 			# mac64 mac-arm64 \
 			# win64 win-arm64
 
