@@ -3,6 +3,9 @@
 url_linux_crypto="https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/002_src_libsqlfs/openssl_libs/libcrypto.a"
 url_linux_ssl="https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/002_src_libsqlfs/openssl_libs/libssl.a"
 
+url_win_x86_64_libcrypto='https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/002_src_libsqlfs/openssl_win64_libs/libcrypto.a'
+url_win_x86_64_libssl='https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/002_src_libsqlfs/openssl_win64_libs/libssl.a'
+
 _HOME2_=$(dirname $0)
 export _HOME2_
 _HOME_=$(cd $_HOME2_;pwd)
@@ -27,6 +30,8 @@ wget https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/003_src_iocip
 wget https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/003_src_iocipher/libiocipher2-c/src/main/jniLibs/x86_64/libcrypto.a -O ./openssl_libs/android-x86_64/libcrypto.a || exit 1
 wget https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/003_src_iocipher/libiocipher2-c/src/main/jniLibs/x86_64/libssl.a -O ./openssl_libs/android-x86_64/libssl.a || exit 1
 
+wget "$url_win_x86_64_libcrypto" -O ./openssl_libs/Windows-x86_64/libcrypto.a
+wget "$url_win_x86_64_libssl" -O  ./openssl_libs/Windows-x86_64/libssl.a
 
 mkdir -p "$basedir""/openssl_includes/temp/"
 cd "$basedir""/openssl_includes/temp/" || exit 1

@@ -8,11 +8,10 @@ file_x86='linux-android-x86__libsqlitejdbc.so'
 file_x86_64='linux-android-x64__libsqlitejdbc.so'
 
 file_linux_x86_64='linux64__libsqlitejdbc.so'
-
-url_win_x86_64_libcrypto='https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/002_src_libsqlfs/openssl_win64_libs/libcrypto.a'
-url_win_x86_64_libssl='https://github.com/zoff99/iocipher_pack/raw/refs/heads/master/002_src_libsqlfs/openssl_win64_libs/libssl.a'
+file_win_x86_64='win64__libsqlitejdbc.so'
 
 file_jnilib='libsqlitejdbc.so'
+file_win_jnilib='sqlitejdbc.dll'
 
 _HOME2_=$(dirname $0)
 export _HOME2_
@@ -22,6 +21,7 @@ export _HOME_
 basedir1="$_HOME_""/../src/main/resources/org/sqlite/native/Linux-Android/"
 basedir2="$_HOME_""/../example_android/androidjdbc/nativelibs/"
 basedir3="$_HOME_""/../src/main/resources/org/sqlite/native/Linux/x86_64/"
+basedir4="$_HOME_""/../src/main/resources/org/sqlite/native/Windows/x86_64/"
 
 mkdir -p "$basedir1"
 mkdir -p "$basedir2"
@@ -43,6 +43,8 @@ wget "$base_url""$file_x86_64" -O ./x86_64/"$file_jnilib"
 cd "$basedir3"
 wget "$base_url""$file_linux_x86_64" -O ./"$file_jnilib"
 
+cd "$basedir4"
+wget "$base_url""$file_win_x86_64" -O ./"$file_win_jnilib"
 
 cd "$basedir1"
 
@@ -56,5 +58,3 @@ cp -v "$basedir1"/arm/"$file_jnilib" "$basedir2"/armeabi-v7a/"$file_jnilib"
 cp -v "$basedir1"/x86/"$file_jnilib" "$basedir2"/x86/"$file_jnilib"
 cp -v "$basedir1"/x86_64/"$file_jnilib" "$basedir2"/x86_64/"$file_jnilib"
 
-wget "$url_win_x86_64_libcrypto" -O "$_HOME_"/../openssl_libs/Windows-x86_64/libcrypto.a
-wget "$url_win_x86_64_libssl" -O  "$_HOME_"/../openssl_libs/Windows-x86_64/libssl.a
