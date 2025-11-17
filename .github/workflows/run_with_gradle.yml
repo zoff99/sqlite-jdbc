@@ -24,6 +24,11 @@ jobs:
           cd example_gradle_linux/
           ./gradlew run
 
+      - name: show beginning of the DB file
+        run: |
+          cd example_gradle_linux/
+          cat app/sample.db|hexdump -C|head -24
+
   windows:
     runs-on: windows-latest
     steps:
@@ -46,5 +51,12 @@ jobs:
         run: |
           cd example_gradle_linux/
           ./gradlew run
+
+      - name: show beginning of the DB file
+        shell: bash
+        run: |
+          cd example_gradle_linux/
+          cat app/sample.db|hexdump -C|head -24
+
 
 
