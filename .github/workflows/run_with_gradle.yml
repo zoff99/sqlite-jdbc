@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           cd example_gradle_linux/
-          cat app/sample.db|hexdump -C|head -24
+          cat app/sample.db|xxd|head -24
 
 
 
