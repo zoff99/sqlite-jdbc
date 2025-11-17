@@ -29,6 +29,17 @@ jobs:
           cd example_gradle_linux/
           cat app/sample.db|hexdump -C|head -24
 
+      - name: check if DB is really encrypted
+        shell: bash
+        run: |
+          cd example_gradle_linux/
+          err=$(cat app/sample.db|xxd|head -24|grep "SQLite")
+          if [ "$err""x" != "x" ]; then
+            echo "Database may not be encrypted !"
+            exit 1
+          fi
+
+
   windows:
     runs-on: windows-latest
     steps:
@@ -58,5 +69,13 @@ jobs:
           cd example_gradle_linux/
           cat app/sample.db|xxd|head -24
 
-
+      - name: check if DB is really encrypted
+        shell: bash
+        run: |
+          cd example_gradle_linux/
+          err=$(cat app/sample.db|xxd|head -24|grep "SQLite")
+          if [ "$err""x" != "x" ]; then
+            echo "Database may not be encrypted !"
+            exit 1
+          fi
 
