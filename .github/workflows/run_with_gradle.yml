@@ -24,27 +24,27 @@ jobs:
           cd example_gradle_linux/
           ./gradlew run
 
-  windows-test:
+  windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Display the path
-        run: echo %PATH%
-        shell: cmd
-
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Display the path
+        run: echo %PATH%
+        shell: cmd
+
       - name: java-version
         run: java -version
         shell: bash
 
-    - name: run with gradle
-      shell: bash
-      run: |
-        cd example_gradle_linux/
-        ./gradlew run
+      - name: run with gradle
+        shell: bash
+        run: |
+          cd example_gradle_linux/
+          ./gradlew run
 
 
