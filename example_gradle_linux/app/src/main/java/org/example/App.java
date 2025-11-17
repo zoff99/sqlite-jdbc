@@ -8,7 +8,8 @@ import java.sql.Statement;
 
 public class App {
 
-    static final String secrect_key = "SuperSecure123%!";
+    // static final String secrect_key = "SuperSecure123%!";
+    static final String secrect_key = "";
 
     public static void main(String[] args) {
         System.out.println("Test App");
