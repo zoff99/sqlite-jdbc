@@ -24,7 +24,9 @@ SQLITE_INCLUDE := $(shell dirname "$(SQLITE_HEADER)")
 
 ismingw = 0
 ccmachine = $(shell $(CC) -dumpmachine)
+$(info ccmachine: $(ccmachine))
 ifeq ($(findstring mingw, $(ccmachine)), mingw)
+$(info ########### mingw CCFLAGS ###########)
 	ismingw = 1
 	CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS) -lwsock32 -Wl,-kill-at
 	# -Wl,-z,max-page-size=16384
@@ -32,7 +34,11 @@ ifeq ($(findstring mingw, $(ccmachine)), mingw)
 	LINKFLAGS:= -lwsock32 -l:libiphlpapi.a -Wl,-Bstatic -lcrypt32 -Wl,-Bstatic -lws2_32 $(LINKFLAGS)
 	CC="x86_64-w64-mingw32-gcc"
 	AR="x86_64-w64-mingw32-ar"
+else ifeq ($(findstring apple, $(ccmachine)), apple)
+$(info ########### APPLE CCFLAGS ###########)
+    CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
 else
+$(info ########### default CCFLAGS ###########)
 	CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS) -Wl,-z,max-page-size=16384
 endif
 
@@ -166,10 +172,12 @@ linux-arm64: $(SQLITE_UNPACKED) jni-header
 
 ## ------ macOS ------
 mac64: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=x86_64-apple-darwin multiarch/crossbuild make clean-native native OS_NAME=Mac OS_ARCH=x86_64
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=x86_64-apple-darwin multiarch/crossbuild make clean-native \
+	native OS_NAME=Mac OS_ARCH=x86_64 CC="/usr/osxcross/bin/x86_64-apple-darwin14-cc" CROSS_PREFIX="/usr/osxcross/bin/x86_64-apple-darwin14-"
 
 mac-arm64: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=aarch64-apple-darwin gotson/crossbuild make clean-native native OS_NAME=Mac OS_ARCH=aarch64 CROSS_PREFIX="/usr/osxcross/bin/aarch64-apple-darwin20.4-"
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=aarch64-apple-darwin gotson/crossbuild make clean-native \
+	native OS_NAME=Mac OS_ARCH=aarch64 CC="/usr/osxcross/bin/aarch64-apple-darwin20.4-cc" CROSS_PREFIX="/usr/osxcross/bin/aarch64-apple-darwin20.4-"
 ## ------ macOS ------
 
 
@@ -179,8 +187,8 @@ win64: $(SQLITE_UNPACKED) jni-header
 	pwd
 	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work -i sqlite-jdbc_windows-static-x64-posix bash -c 'pwd; env|grep CC ; make clean-native native CROSS_PREFIX=x86_64-w64-mingw32- OS_NAME=Windows OS_ARCH=x86_64'
 
-win-arm64: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-windows-arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=aarch64-w64-mingw32- OS_NAME=Windows OS_ARCH=aarch64'
+#win-arm64: $(SQLITE_UNPACKED) jni-header
+#	./docker/dockcross-windows-arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=aarch64-w64-mingw32- OS_NAME=Windows OS_ARCH=aarch64'
 ## ------ Windows ------
 
 

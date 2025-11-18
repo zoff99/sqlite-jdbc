@@ -36,7 +36,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-Android-arm Linux-Android-aarch64 Linux-Android-x86 Linux-Android-x86_64 Windows-x86_64
+known_targets := Linux-Android-arm Linux-Android-aarch64 Linux-Android-x86 Linux-Android-x86_64 Windows-x86_64 Mac-x86_64 Mac-aarch64
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -105,6 +105,26 @@ Linux-Android-x86_64_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-soname,libsqlitejdbc
 Linux-Android-x86_64_LIBNAME   := libsqlitejdbc.so
 Linux-Android-x86_64_SQLITE_FLAGS  :=
 
+Mac-x86_64_CC        := gcc -arch $(OS_ARCH) 
+Mac-x86_64_STRIP     := strip -x
+MAC_SDK := /Developer/SDKs/MacOSX10.10.sdk
+ifeq ($(wildcard MAC_SDK),)
+	MAC_SDK := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk
+endif
+Mac-x86_64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.6 -fvisibility=hidden -Wno-implicit-function-declaration
+Mac-x86_64_LINKFLAGS := -dynamiclib 
+Mac-x86_64_LIBNAME   := libsqlitejdbc.dylib
+Mac-x86_64_SQLITE_FLAGS  := 
+
+# Use a CROSS_PREFIX as the cross-triple clang is not available in crossbuild, see https://github.com/multiarch/crossbuild/blob/ad79cc84b6fb3fb1d09bc4a78719ef26f23bab85/Dockerfile#L134
+# When running on a M1 mac, CROSS_PREFIX will be empty, and 'make native' can still build
+Mac-aarch64_CC        := $(CROSS_PREFIX)clang
+Mac-aarch64_STRIP     := $(CROSS_PREFIX)strip -x
+MAC_SDK := /usr/osxcross/SDK/MacOSX11.3.sdk
+Mac-aarch64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.9 -fvisibility=hidden -Wno-implicit-function-declaration
+Mac-aarch64_LINKFLAGS  := -dynamiclib
+Mac-aarch64_LIBNAME    := libsqlitejdbc.dylib
+Mac-aarch64_SQLITE_FLAGS := 
 
 CC        := $($(target)_CC)
 STRIP     := $($(target)_STRIP)
