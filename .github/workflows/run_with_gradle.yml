@@ -77,37 +77,37 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-    - name: macos-version1
-      run: sw_vers -productVersion
+      - name: macos-version1
+        run: sw_vers -productVersion
 
-    - name: macos-version2
-      run: system_profiler SPSoftwareDataType
+      - name: macos-version2
+        run: system_profiler SPSoftwareDataType
 
-    - name: java-version
-      run: java -version
-      shell: bash
+      - name: java-version
+        run: java -version
+        shell: bash
 
-    - name: run with gradle
-      shell: bash
-      run: |
-        cd example_gradle_linux/
-        ./gradlew run
+      - name: run with gradle
+        shell: bash
+        run: |
+          cd example_gradle_linux/
+          ./gradlew run
 
-    - name: show beginning of the DB file
-      shell: bash
-      run: |
-        cd example_gradle_linux/
-        cat app/sample.db|xxd|head -24
+      - name: show beginning of the DB file
+        shell: bash
+        run: |
+          cd example_gradle_linux/
+          cat app/sample.db|xxd|head -24
 
-    - name: check if DB is really encrypted
-      shell: bash
-      run: |
-        cd example_gradle_linux/
-        err=$(cat app/sample.db|xxd|head -24|grep "SQLite"||echo "")
-        if [ "$err""x" != "x" ]; then
-          echo "Database may not be encrypted !"
-          exit 1
-        fi
+      - name: check if DB is really encrypted
+        shell: bash
+        run: |
+          cd example_gradle_linux/
+          err=$(cat app/sample.db|xxd|head -24|grep "SQLite"||echo "")
+          if [ "$err""x" != "x" ]; then
+            echo "Database may not be encrypted !"
+            exit 1
+          fi
 
   windows:
     runs-on: windows-latest
