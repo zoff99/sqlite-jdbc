@@ -8,10 +8,13 @@ file_x86='linux-android-x86__libsqlitejdbc.so'
 file_x86_64='linux-android-x64__libsqlitejdbc.so'
 
 file_linux_x86_64='linux64__libsqlitejdbc.so'
+file_linux_arm64='linux-arm64__libsqlitejdbc.so'
 file_win_x86_64='win64__libsqlitejdbc.so'
+file_macos_arm64='mac-arm64__libsqlitejdbc.so'
 
 file_jnilib='libsqlitejdbc.so'
 file_win_jnilib='sqlitejdbc.dll'
+file_macos_jnilib='libsqlitejdbc.dylib'
 
 _HOME2_=$(dirname $0)
 export _HOME2_
@@ -22,6 +25,8 @@ basedir1="$_HOME_""/../src/main/resources/org/sqlite/native/Linux-Android/"
 basedir2="$_HOME_""/../example_android/androidjdbc/nativelibs/"
 basedir3="$_HOME_""/../src/main/resources/org/sqlite/native/Linux/x86_64/"
 basedir4="$_HOME_""/../src/main/resources/org/sqlite/native/Windows/x86_64/"
+basedir5="$_HOME_""/../src/main/resources/org/sqlite/native/Linux/aarch64/"
+basedir6="$_HOME_""/../src/main/resources/org/sqlite/native/Mac/aarch64/"
 
 mkdir -p "$basedir1"
 mkdir -p "$basedir2"
@@ -45,6 +50,12 @@ wget "$base_url""$file_linux_x86_64" -O ./"$file_jnilib"
 
 cd "$basedir4"
 wget "$base_url""$file_win_x86_64" -O ./"$file_win_jnilib"
+
+cd "$basedir5"
+wget "$base_url""$file_linux_arm64" -O ./"$file_jnilib"
+
+cd "$basedir6"
+wget "$base_url""$file_macos_arm64" -O ./"$file_macos_jnilib"
 
 cd "$basedir1"
 
