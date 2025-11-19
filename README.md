@@ -44,10 +44,23 @@ see: https://github.com/zoff99/sqlite-jdbc/tree/android_test/example_android
 
 ### Linux Desktop Gradle config
 
-add this line to your build.gradle dependencies:
+add the jitpack.io repository to your build.gradle
 
 ```
-implementation 'com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.19'
+repositories {
+    mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
+}
+```
+
+and add the this library to your dependencies in build.gradle
+
+```
+dependencies {
+    implementation 'com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.19'
+}
 ```
 
 ### Linux Desktop Example Project
