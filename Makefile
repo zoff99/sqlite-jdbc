@@ -122,8 +122,8 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux64 linux-arm64 win64
-			# mac64 mac-arm64
+native-all: linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux64 linux-arm64 win64 mac-arm64
+			# mac64
 			# win-arm64
 
 native: $(NATIVE_DLL)
@@ -176,8 +176,10 @@ mac64: $(SQLITE_UNPACKED) jni-header
 	native OS_NAME=Mac OS_ARCH=x86_64 CC="/usr/osxcross/bin/x86_64-apple-darwin14-cc" CROSS_PREFIX="/usr/osxcross/bin/x86_64-apple-darwin14-"
 
 mac-arm64: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=aarch64-apple-darwin gotson/crossbuild make clean-native \
-	native OS_NAME=Mac OS_ARCH=aarch64 CC="/usr/osxcross/bin/aarch64-apple-darwin20.4-cc" CROSS_PREFIX="/usr/osxcross/bin/aarch64-apple-darwin20.4-"
+	./custom_docker/macos-arm64/do.sh
+	pwd
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work -i sqlite-jdbc_macos_arm64 \
+	bash -c 'make clean-native native OS_NAME=Mac OS_ARCH=aarch64 CC="/usr/osxcross/bin/aarch64-apple-darwin20.4-cc" CROSS_PREFIX="/usr/osxcross/bin/aarch64-apple-darwin20.4-" && chmod -R a+w ./target/*-Mac-aarch64 ./target/classes/org/sqlite/native/'
 ## ------ macOS ------
 
 

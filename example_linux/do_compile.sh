@@ -56,6 +56,8 @@ cp -av ../../src/main/resources/org/sqlite/native/Linux/aarch64/libsqlitejdbc.so
 mkdir -p org/sqlite/native/Windows/x86_64
 cp -av ../../src/main/resources/org/sqlite/native/Windows/x86_64/sqlitejdbc.dll org/sqlite/native/Windows/x86_64/sqlitejdbc.dll || exit 1
 
+mkdir -p org/sqlite/native/Mac/aarch64
+cp -av ../../src/main/resources/org/sqlite/native/Mac/aarch64/libsqlitejdbc.dylib org/sqlite/native/Mac/aarch64/libsqlitejdbc.dylib || exit 1
 
 
 jar cmvf META-INF/MANIFEST.MF ../sqlite-jdbc-sqlcipher-"$cur_str_version".jar . || exit 1
