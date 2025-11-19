@@ -42,6 +42,14 @@ see: https://github.com/zoff99/sqlite-jdbc/tree/android_test/example_android
 <br>
 
 
+### Linux Desktop Gradle config
+
+add this line to your build.gradle dependencies:
+
+```
+implementation 'com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.19'
+```
+
 ### Linux Desktop Example Project
 see: https://github.com/zoff99/sqlite-jdbc/tree/android_test/example_linux
 
