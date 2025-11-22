@@ -130,9 +130,10 @@ jobs:
         if: matrix.api-level == '35'
         run: |
           cd /tmp/
+          set -x
           echo " " >> text.db
-          content=$(cat text.db 2>/dev/null | head -50 2> /dev/null)
-          err=$(echo $content|xxd -l380|head -24|grep "SQLite"||echo "")
+          content=$(cat text.db 2>/dev/null || echo " ")
+          err=$(echo "$content"|xxd -l180|head -24|grep "SQLite"||echo "")
           if [ "$err""x" != "x" ]; then
            echo "Database may not be encrypted !"
             exit 1
