@@ -99,7 +99,7 @@ jobs:
           path: |
             /home/runner/android_screen*.png
 
-      - name: upload screenshots
+      - name: upload adb log
         uses: actions/upload-artifact@v5
         with:
           name: adb_log_${{ matrix.api-level }}
