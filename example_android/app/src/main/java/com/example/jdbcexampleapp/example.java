@@ -2,13 +2,17 @@ package com.example.jdbcexampleapp;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Environment;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
 @SuppressWarnings("ALL")
 public class example
@@ -23,6 +27,7 @@ public class example
     private static final int num_inserts = 500;
     private static final int num_threads_write = 3;
     private static final int num_threads_read = 10;
+    private static final boolean DANGER_DEBUG_DANGER = false; // !!!never set this to true!!! it will put the database file into a public directory for CI testing
 
     /*
      * Runs SQL statements that are seperated by ";" character
@@ -460,6 +465,14 @@ public class example
         // path = c.getExternalFilesDir(null).getAbsolutePath() + "/" + "text" + ".db";
         // path = "/data/data/com.example.jdbcexampleapp/files/" + "text.db";
         path = c.getFilesDir().getAbsolutePath() + "/" + "text" + ".db";
+
+        if (DANGER_DEBUG_DANGER)
+        {
+            File sdcard = Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS);
+            System.out.println(TAG + "sdcard: " + sdcard.getAbsolutePath());
+            path = sdcard.getAbsolutePath() + "/text" + ".db";
+        }
+
         System.out.println(TAG + "path: " + path);
         ret = ret + "\n" + "path: " + path;
 
