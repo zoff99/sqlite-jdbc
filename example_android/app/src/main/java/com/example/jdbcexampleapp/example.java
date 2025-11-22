@@ -19,7 +19,7 @@ public class example
 {
     private String path;
     private final String TAG = "JDBC-Example:";
-    private final String good_password = "pass1;\\ \t \r \n 23i/ .. . + , ; : _ - !\"§$%&/()=?[]{}@#.* x* yesj,ä0p23.oe jiwayä,wsyäysä9 wrr jäsäökfs poö$§&";
+    private final String good_password = "";
     private static Connection connection = null;
     private static String ret = "";
     private static boolean thread_read_stop = false;
