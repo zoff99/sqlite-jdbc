@@ -89,6 +89,7 @@ jobs:
             adb logcat -d > ~/adb_log.txt
             # adb shell "ls -al /sdcard/" >> ~/adb_log.txt
             # adb shell "ls -al /sdcard/Download/" >> ~/adb_log.txt
+            sleep 2
             echo ${{ matrix.api-level }}
             if [ "${{ matrix.api-level }}""x" = "35""x" ]; then adb pull /sdcard/Download/text.db /tmp/text.db ; fi
             sleep 2
@@ -122,14 +123,14 @@ jobs:
         if: matrix.api-level == '35'
         run: |
           cd /tmp/
-          cat text.db|xxd|head -24
+          cat text.db|xxd -l80|head -24 || echo "no ERR"
 
       - name: check if DB is really encrypted
         shell: bash
         if: matrix.api-level == '35'
         run: |
           cd /tmp/
-          err=$(cat text.db|xxd|head -24|grep "SQLite"||echo "")
+          err=$(cat text.db|xxd -l80|head -24|grep "SQLite"||echo "")
           if [ "$err""x" != "x" ]; then
            echo "Database may not be encrypted !"
             exit 1
