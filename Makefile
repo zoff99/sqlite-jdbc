@@ -29,7 +29,6 @@ ifeq ($(findstring mingw, $(ccmachine)), mingw)
 $(info ########### mingw CCFLAGS ###########)
 	ismingw = 1
 	CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS) -lwsock32 -Wl,-kill-at
-	# -Wl,-z,max-page-size=16384
 	CCFLAGS += -l:libiphlpapi.a -Wl,-Bstatic -lcrypt32 -Wl,-Bstatic -lws2_32
 	LINKFLAGS:= -lwsock32 -l:libiphlpapi.a -Wl,-Bstatic -lcrypt32 -Wl,-Bstatic -lws2_32 $(LINKFLAGS)
 	CC="x86_64-w64-mingw32-gcc"
@@ -39,7 +38,7 @@ $(info ########### APPLE CCFLAGS ###########)
     CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
 else
 $(info ########### default CCFLAGS ###########)
-	CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS) -Wl,-z,max-page-size=16384
+	CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
 endif
 
 
@@ -122,8 +121,7 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux64 linux-arm64 win64 mac-arm64
-			# mac64
+native-all: linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux64 linux-arm64 win64 mac64 mac-arm64
 			# win-arm64
 
 native: $(NATIVE_DLL)
@@ -172,8 +170,10 @@ linux-arm64: $(SQLITE_UNPACKED) jni-header
 
 ## ------ macOS ------
 mac64: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=x86_64-apple-darwin multiarch/crossbuild make clean-native \
-	native OS_NAME=Mac OS_ARCH=x86_64 CC="/usr/osxcross/bin/x86_64-apple-darwin14-cc" CROSS_PREFIX="/usr/osxcross/bin/x86_64-apple-darwin14-"
+	./custom_docker/macos64/do.sh
+	pwd
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work -i sqlite-jdbc_macos64 \
+	bash -c 'make clean-native native OS_NAME=Mac OS_ARCH=x86_64 CC="/usr/osxcross/bin/x86_64-apple-darwin14-cc" CROSS_PREFIX="/usr/osxcross/bin/x86_64-apple-darwin14-" && chmod -R a+w ./target/*-Mac-x86_64 ./target/classes/org/sqlite/native/'
 
 mac-arm64: $(SQLITE_UNPACKED) jni-header
 	./custom_docker/macos-arm64/do.sh

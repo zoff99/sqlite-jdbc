@@ -11,6 +11,7 @@ file_linux_x86_64='linux64__libsqlitejdbc.so'
 file_linux_arm64='linux-arm64__libsqlitejdbc.so'
 file_win_x86_64='win64__libsqlitejdbc.so'
 file_macos_arm64='mac-arm64__libsqlitejdbc.so'
+file_macos64='mac64__libsqlitejdbc.so'
 
 file_jnilib='libsqlitejdbc.so'
 file_win_jnilib='sqlitejdbc.dll'
@@ -27,6 +28,7 @@ basedir3="$_HOME_""/../src/main/resources/org/sqlite/native/Linux/x86_64/"
 basedir4="$_HOME_""/../src/main/resources/org/sqlite/native/Windows/x86_64/"
 basedir5="$_HOME_""/../src/main/resources/org/sqlite/native/Linux/aarch64/"
 basedir6="$_HOME_""/../src/main/resources/org/sqlite/native/Mac/aarch64/"
+basedir7="$_HOME_""/../src/main/resources/org/sqlite/native/Mac/x86_64/"
 
 mkdir -p "$basedir1"
 mkdir -p "$basedir2"
@@ -56,6 +58,9 @@ wget "$base_url""$file_linux_arm64" -O ./"$file_jnilib"
 
 cd "$basedir6"
 wget "$base_url""$file_macos_arm64" -O ./"$file_macos_jnilib"
+
+cd "$basedir7"
+wget "$base_url""$file_macos64" -O ./"$file_macos_jnilib"
 
 cd "$basedir1"
 
