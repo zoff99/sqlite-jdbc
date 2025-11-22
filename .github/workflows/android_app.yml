@@ -61,6 +61,7 @@ jobs:
               echo "===========2========="
 
       - name: activate DANGER DEBUG MODE DANGER
+        if: matrix.api-level == '35'
         run:  |
               sed -i -e 's#boolean DANGER_DEBUG_DANGER =.*#boolean DANGER_DEBUG_DANGER = true;#' example_android/app/src/main/java/com/example/jdbcexampleapp/example.java
               cat example_android/app/src/main/java/com/example/jdbcexampleapp/example.java | grep "DANGER_DEBUG_DANGER ="
