@@ -123,7 +123,7 @@ jobs:
         if: matrix.api-level == '35'
         run: |
           cd /tmp/
-          cat text.db|xxd|head -24 || echo "no ERR"
+          cat text.db 2>/dev/null|xxd 2>/dev/null|head -24 || echo "no ERR"
 
       - name: check if DB is really encrypted
         shell: bash
@@ -131,7 +131,7 @@ jobs:
         run: |
           cd /tmp/
           echo " " >> text.db
-          content=$(cat text.db|xxd|head -24 || echo "no ERR")
+          content=$(cat text.db 2>/dev/null|xxd 2>/dev/null|head -24 || echo "no ERR")
           err=$(echo "$content"|grep "SQLite"||echo "")
           if [ "$err""x" != "x" ]; then
            echo "Database may not be encrypted !"
