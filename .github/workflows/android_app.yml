@@ -90,7 +90,7 @@ jobs:
             # adb shell "ls -al /sdcard/" >> ~/adb_log.txt
             # adb shell "ls -al /sdcard/Download/" >> ~/adb_log.txt
             echo ${{ matrix.api-level }}
-            if [ ${{ matrix.api-level }} == "35" ]; then adb pull /sdcard/Download/text.db /tmp/text.db ; fi
+            if [ "${{ matrix.api-level }}""x" == "35""x" ]; then adb pull /sdcard/Download/text.db /tmp/text.db ; fi
             sleep 2
 
 # cat android_screen01_21.png|sed 's/\r$//' > screenshot.png
