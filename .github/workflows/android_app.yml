@@ -130,7 +130,6 @@ jobs:
         if: matrix.api-level == '35'
         run: |
           cd /tmp/
-          set -x
           echo " " >> text.db
           content=$(cat text.db|xxd|head -24 || echo "no ERR")
           err=$(echo "$content"|grep "SQLite"||echo "")
