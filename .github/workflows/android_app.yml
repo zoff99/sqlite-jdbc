@@ -84,13 +84,14 @@ jobs:
             adb shell am start -n com.example.jdbcexampleapp/com.example.jdbcexampleapp.MainActivity  &
             sleep 80
             adb exec-out screencap -p > ~/android_screen01_${{ matrix.api-level }}.png
-            adb shell "ls -al /sdcard/"
-            adb shell "ls -al /storage/emulated/0/"
-            adb shell "ls -al /storage/emulated/0/Download/"
-            adb pull /storage/emulated/0/Download/text.db /tmp/text.db
             ls -al ~/android_screen01_${{ matrix.api-level }}.png
             adb logcat -d |grep 'JDBC-Example:'
             adb logcat -d > ~/adb_log.txt
+            adb shell "ls -al /sdcard/" >> ~/adb_log.txt
+            adb shell "ls -al /sdcard/Download/" >> ~/adb_log.txt
+            # adb shell "ls -al /storage/emulated/0/"
+            # adb shell "ls -al /storage/emulated/0/Download/"
+            adb pull /sdcard/Download/text.db /tmp/text.db
             sleep 2
 
 # cat android_screen01_21.png|sed 's/\r$//' > screenshot.png
