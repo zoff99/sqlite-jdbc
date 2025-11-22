@@ -60,6 +60,11 @@ jobs:
               java -version || exit 0
               echo "===========2========="
 
+      - name: activate DANGER DEBUG MODE DANGER
+        run:  |
+              sed -i -e 's#boolean DANGER_DEBUG_DANGER =.*#boolean DANGER_DEBUG_DANGER = true;#' example_android/app/src/main/java/com/example/jdbcexampleapp/example.java
+              cat example_android/app/src/main/java/com/example/jdbcexampleapp/example.java | grep "DANGER_DEBUG_DANGER ="
+
       - name: android test
         timeout-minutes: 30
         continue-on-error: true
@@ -79,6 +84,7 @@ jobs:
             adb shell am start -n com.example.jdbcexampleapp/com.example.jdbcexampleapp.MainActivity  &
             sleep 120
             adb exec-out screencap -p > ~/android_screen01_${{ matrix.api-level }}.png
+            adb pull /storage/emulated/0/Download/text.db /tmp/text.db
             ls -al ~/android_screen01_${{ matrix.api-level }}.png
             adb logcat -d |grep 'JDBC-Example:'
             adb logcat -d > ~/adb_log.txt
@@ -99,6 +105,29 @@ jobs:
           name: adb_log_${{ matrix.api-level }}
           path: |
             /home/runner/adb_log.txt
+
+      - name: check the existence of the DB file
+        shell: bash
+        run: |
+          cd tmp/
+          ls -al text.db
+          ls -hal text.db
+
+      - name: show beginning of the DB file
+        shell: bash
+        run: |
+          cd tmp/
+          cat text.db|xxd|head -24
+
+      - name: check if DB is really encrypted
+        shell: bash
+        run: |
+          cd tmp/
+          err=$(cat text.db|xxd|head -24|grep "SQLite"||echo "")
+          if [ "$err""x" != "x" ]; then
+            echo "Database may not be encrypted !"
+            exit 1
+          fi
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
