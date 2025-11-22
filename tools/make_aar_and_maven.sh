@@ -15,7 +15,10 @@ cd example_android/
 cd "$basedir"
 ls -al ./example_android/androidjdbc/build/outputs/aar/androidjdbc-release.aar || exit 1
 
-
+mkdir -p /tmp/check_alignment/
+cd /tmp/check_alignment/
+unzip "$basedir"/example_android/androidjdbc/build/outputs/aar/androidjdbc-release.aar
+"$basedir"/tool/check_elf_alignment.sh .
 
 cd "$basedir"
 f1="example_android/androidjdbc/build.gradle"
