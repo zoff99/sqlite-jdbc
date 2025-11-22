@@ -87,11 +87,12 @@ jobs:
             ls -al ~/android_screen01_${{ matrix.api-level }}.png
             adb logcat -d |grep 'JDBC-Example:'
             adb logcat -d > ~/adb_log.txt
-            adb shell "ls -al /sdcard/" >> ~/adb_log.txt
-            adb shell "ls -al /sdcard/Download/" >> ~/adb_log.txt
-            # adb shell "ls -al /storage/emulated/0/"
-            # adb shell "ls -al /storage/emulated/0/Download/"
+            # adb shell "ls -al /sdcard/" >> ~/adb_log.txt
+            # adb shell "ls -al /sdcard/Download/" >> ~/adb_log.txt
+            echo ${{ matrix.api-level }}
+            if [ ${{ matrix.api-level }} == "35" ]; then
             adb pull /sdcard/Download/text.db /tmp/text.db
+            fi
             sleep 2
 
 # cat android_screen01_21.png|sed 's/\r$//' > screenshot.png
@@ -110,28 +111,31 @@ jobs:
           path: |
             /home/runner/adb_log.txt
 
-#      - name: check the existence of the DB file
-#        shell: bash
-#        run: |
-#          cd tmp/
-#          ls -al text.db
-#          ls -hal text.db
-#
-#      - name: show beginning of the DB file
-#        shell: bash
-#        run: |
-#          cd tmp/
-#          cat text.db|xxd|head -24
-#
-#      - name: check if DB is really encrypted
-#        shell: bash
-#        run: |
-#          cd tmp/
-#          err=$(cat text.db|xxd|head -24|grep "SQLite"||echo "")
-#          if [ "$err""x" != "x" ]; then
-#            echo "Database may not be encrypted !"
-#            exit 1
-#          fi
+      - name: check the existence of the DB file
+        shell: bash
+        if: matrix.api-level == '35'
+        run: |
+          cd tmp/
+          ls -al text.db
+          ls -hal text.db
+
+      - name: show beginning of the DB file
+        shell: bash
+        if: matrix.api-level == '35'
+        run: |
+          cd tmp/
+          cat text.db|xxd|head -24
+
+      - name: check if DB is really encrypted
+        shell: bash
+        if: matrix.api-level == '35'
+        run: |
+          cd tmp/
+          err=$(cat text.db|xxd|head -24|grep "SQLite"||echo "")
+          if [ "$err""x" != "x" ]; then
+           echo "Database may not be encrypted !"
+            exit 1
+          fi
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
