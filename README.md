@@ -1,5 +1,5 @@
-SQLite JDBC Driver with SQLCipher included (for Android and Desktop JVM)
-------------------------------------------------------------------------
+SQLite JDBC Driver with SQLCipher (for Android and Desktop JVM)
+---------------------------------------------------------------
 
 <h3>also works on Linux x86_64 Desktop java now!</h3>
 
