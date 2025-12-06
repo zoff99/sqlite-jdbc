@@ -1,6 +1,11 @@
 SQLite JDBC Driver with SQLCipher (for Android and Desktop JVM)
 ---------------------------------------------------------------
 
+This is a fork of https://github.com/xerial/sqlite-jdbc with `sqlcipher` included.<br>
+You can use it as a drop-in replacement in your JVM Desktop or Android project.<br>
+Best used with [Sorma2](https://github.com/zoff99/sorma2)<br>
+<br>
+
 [![Build Native](https://github.com/zoff99/sqlite-jdbc/actions/workflows/build-native.yml/badge.svg)](https://github.com/zoff99/sqlite-jdbc/actions/workflows/build-native.yml)
 [![Android Example App](https://github.com/zoff99/sqlite-jdbc/actions/workflows/android_app.yml/badge.svg?branch=android_test)](https://github.com/zoff99/sqlite-jdbc/actions/workflows/android_app.yml)
 [![Release](https://jitpack.io/v/zoff99/pkgs_zoffccAndroidJDBC.svg)](https://jitpack.io/#zoff99/pkgs_zoffccAndroidJDBC)
