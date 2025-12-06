@@ -40,7 +40,7 @@ see: https://github.com/zoff99/sqlite-jdbc/tree/android_test/example_android
 <br>
 
 
-### Linux and Windows Desktop Gradle Example Project
+### Desktop (Linux / Windows / macOS) Gradle Example Project
 see: https://github.com/zoff99/sqlite-jdbc/tree/android_test/example_gradle_linux
 
 add the jitpack.io repository to your build.gradle
