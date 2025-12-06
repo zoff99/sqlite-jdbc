@@ -9,7 +9,7 @@ SQLite JDBC Driver with SQLCipher (for Android and Desktop JVM)
 the Android lib is published on jitpack.io:<br>
 https://jitpack.io/#zoff99/pkgs_zoffccAndroidJDBC
 
-currently it works on Android API 21 and above, and on Linux Desktop Java applications.<br>
+currently it works on Android API 21 and above, and on Desktop Java applications.<br>
 completely removed useless dependency on slf4j [de65785](https://github.com/zoff99/sqlite-jdbc/commit/7e1b07fcab418423c698b3814b9977901e2e441e)
 
 <img src="https://raw.githubusercontent.com/zoff99/sqlite-jdbc/refs/heads/android_test/sqlite-jdbc_coms.png" width="300">
