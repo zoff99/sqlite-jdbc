@@ -81,6 +81,7 @@ jobs:
           disable-animations: true
           disable-spellchecker: true
           script: |
+            cd example_android/ ; ./gradlew :app:checkReleaseAarMetadata --stacktrace || echo "NO ERR"
             cd example_android/ ; ./gradlew build ; ./gradlew installDebug
             adb shell am start -n com.example.jdbcexampleapp/com.example.jdbcexampleapp.MainActivity  &
             sleep 80

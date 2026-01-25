@@ -10,6 +10,7 @@ basedir="$_HOME_""/../"
 cd "$basedir"
 
 cd example_android/
+./gradlew checkReleaseAarMetadata --stacktrace || echo "NO ERR"
 ./gradlew assembleRelease || exit 1
 
 cd "$basedir"
