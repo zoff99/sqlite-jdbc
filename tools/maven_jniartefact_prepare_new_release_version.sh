@@ -10,6 +10,8 @@ basedir="$_HOME_""/../"
 f1="example_android/androidjdbc/build.gradle"
 f2="example_android/androidjdbc/src/main/java/com/zoffcc/applications/androidjdbc/BuildConfig.java"
 f3='example_gradle_linux/app/build.gradle'
+f4='README.md'
+f5='example_android/app/build.gradle'
 
 cd "$basedir"
 
@@ -44,6 +46,9 @@ sed -i -e 's#public static final int VERSION_CODE = .*$#public static final int 
 sed -i -e 's#public static final String VERSION_NAME = ".*$#public static final String VERSION_NAME = "'"$next_m_version"'";#g' "$f2"
 
 sed -i -e 's#pkgs_zoffcc_sqlite-jdbc-sqlcipher:.*#pkgs_zoffcc_sqlite-jdbc-sqlcipher:'"$next_m_version""'"'#g' "$f3"
+sed -i -e 's#pkgs_zoffcc_sqlite-jdbc-sqlcipher:.*#pkgs_zoffcc_sqlite-jdbc-sqlcipher:'"$next_m_version""'"'#g' "$f4"
+
+sed -i -e 's#pkgs_zoffccAndroidJDBC:.*#pkgs_zoffccAndroidJDBC:'"$next_m_version""'"'#g' "$f5"
 
 commit_message="jni ""$next_m_version"
 tag_name="jdbcjni""$next_m_version"
