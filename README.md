@@ -63,7 +63,7 @@ and add the this library to your dependencies in build.gradle
 
 ```
 dependencies {
-    implementation 'com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.19'
+    implementation 'com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.22'
 }
 ```
 
