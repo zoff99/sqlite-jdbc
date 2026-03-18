@@ -10,6 +10,7 @@ Best used with [Sorma2](https://github.com/zoff99/sorma2)<br>
 [![Android Example App](https://github.com/zoff99/sqlite-jdbc/actions/workflows/android_app.yml/badge.svg?branch=android_test)](https://github.com/zoff99/sqlite-jdbc/actions/workflows/android_app.yml)
 [![Release](https://jitpack.io/v/zoff99/pkgs_zoffccAndroidJDBC.svg)](https://jitpack.io/#zoff99/pkgs_zoffccAndroidJDBC)
 [![Liberapay](https://img.shields.io/liberapay/goal/zoff.svg?logo=liberapay)](https://liberapay.com/zoff/donate)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zoff99/sqlite-jdbc)
 
 the Android lib is published on jitpack.io:<br>
 https://jitpack.io/#zoff99/pkgs_zoffccAndroidJDBC
