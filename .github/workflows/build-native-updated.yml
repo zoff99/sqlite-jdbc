@@ -19,7 +19,7 @@ jobs:
     permissions:
         contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Move nightly tag to head for nightly release
         run: git tag -f nightly && git push origin nightly -f
 
@@ -29,7 +29,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Build matrix from Makefile
         id: set-matrix
         # parse the Makefile to retrieve the list of targets in 'native-all', without 'native'
@@ -51,7 +51,7 @@ jobs:
     permissions:
         contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # Delete existing libs so we only upload the generated one into the artifact
       - name: Delete existing native libs
