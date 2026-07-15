@@ -11,8 +11,8 @@ android {
         targetSdk 33
         multiDexEnabled true
 
-        versionCode 10027
-        versionName "1.0.27"
+        versionCode 10028
+        versionName "1.0.28"
 
 
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
