@@ -29,7 +29,7 @@ ifeq ($(findstring mingw, $(ccmachine)), mingw)
 $(info ########### mingw CCFLAGS ###########)
 	ismingw = 1
 	CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS) -lwsock32 -Wl,-kill-at
-	CCFLAGS += -l:libiphlpapi.a -Wl,-Bstatic -lcrypt32 -Wl,-Bstatic -lws2_32
+	CCFLAGS += -l:libiphlpapi.a -Wl,-Bstatic -lcrypt32 -Wl,-Bstatic -lws2_32 -D_WIN32_WINNT=0x0601
 	LINKFLAGS:= -lwsock32 -l:libiphlpapi.a -Wl,-Bstatic -lcrypt32 -Wl,-Bstatic -lws2_32 $(LINKFLAGS)
 	CC="x86_64-w64-mingw32-gcc"
 	AR="x86_64-w64-mingw32-ar"
